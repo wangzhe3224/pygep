@@ -20,26 +20,31 @@ import string
 
 
 class Population(object):
-    def __init__(self, cls, size):
+    def __init__(self, cls, size, head):
         '''
         Generates a population of some chromsome class
         @param cls:  Chromosome type
         @param size: population size
+        @param head: chromosome head length
         '''
-        self.size      = size
+        self.size = size
+        self.head = head
 
         # Start an initial population
-        population = [None] * self.size
-        for i in xrange(self.size):
-            population[i] = cls.generate()
-        
-        self.population = population
+        self.population = [i for i in cls.generate(size, head)]
 
         # Header for display purposes
-        self.header = string.digits * (cls.length / len(string.digits)) + \
-                      string.digits[:(cls.length % len(string.digits))]
+        try:
+            l = len(self.population[0])
+            self.header = string.digits * (l / len(string.digits)) + \
+                          string.digits[:(l % len(string.digits))]
+        except IndexError:
+            raise ValueError('Empty populations are meaningless!')
 
 
     def __repr__(self):
         return '\n'.join([str(i) for i in [self.header] + self.population])
-        
+
+
+    def __iter__(self):
+        return iter(self.population)

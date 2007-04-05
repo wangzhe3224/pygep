@@ -1,9 +1,6 @@
 from pygep.chromosome import Chromosome
 from pygep.population import Population
-import sys
-
-def X(x, y, z):
-    return (x + y + z) / 3.
+import math, sys
 
 def M(x, y):
     return x * y
@@ -20,13 +17,22 @@ def D(x, y):
     except ZeroDivisionError:
         return sys.maxint
 
+def Q(x):
+    try:
+        return math.sqrt(x)
+    except ValueError:
+        return 0.0
 
 class Test(Chromosome):
-    functions = M, A, S, D, X
-    terminals = 'x', 'y'
-    head = 20 
+    functions = M, A, S, D, Q
+    terminals = 'a', 'b'
 
+class Data(object):
+    a = 1.
+    b = 2.
 
-p = Population(Test, 30)
-print p
+p = Population(Test, 30, 20)
+d = Data()
+for i in p:
+    print i, i.coding, i.evaluate(d)
 
