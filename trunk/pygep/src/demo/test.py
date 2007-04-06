@@ -1,4 +1,4 @@
-from pygep.chromosome import Chromosome
+from pygep.chromosome import Chromosome, symbol
 from pygep.population import Population
 from pygep.util import cache
 import math, random, sys
@@ -13,16 +13,20 @@ class Data(object):
         self.a = a
 
 # The functions we use in our chromosome
-def M(x, y):
+@symbol('*')
+def multiply(x, y):
     return x * y
 
-def A(x, y):
+@symbol('+')
+def add(x, y):
     return x + y
 
-def S(x, y):
+@symbol('-')
+def subtract(x, y):
     return x - y
 
-def D(x, y):
+@symbol('/')
+def divide(x, y):
     try:
         return x / y
     except ZeroDivisionError:
@@ -36,9 +40,9 @@ def Q(x):
 
 # The chromsomes: fitness is accuracy over the sample
 class Regression(Chromosome):
-    functions = M, A, S, D, Q
+    functions = multiply, add, subtract, divide, Q
     terminals = 'a',
-    sample = [Data(float(random.randint(1, 1000))) for _ in xrange(50)]
+    sample = [Data(float(random.randint(1, 10))) for _ in xrange(25)]
 
     @cache
     def fitness(self):
@@ -51,4 +55,3 @@ class Regression(Chromosome):
 p = Population(Regression, 30, 10)
 for i in p:
     print i, i.fitness()
-

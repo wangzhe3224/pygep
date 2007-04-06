@@ -16,6 +16,23 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from pygep.util import cache
 from random import choice
+import functools
+
+
+def symbol(s):
+    '''
+    Decorator that assigns a symbol to a function for chromosome display.
+    The symbol is stored in the function.symbol attribute.
+
+        @symbol('/')
+        def divide(x, y):
+            return x / y
+    '''
+    def decorator(func):
+        func.symbol = s
+        return func
+
+    return decorator
 
 
 class MetaChromosome(type):
@@ -102,7 +119,13 @@ class Chromosome(object):
         s = ''
         for gene in self.genes:
             # Differentiate between functions and terminals
-            name = gene.__name__ if callable(gene) else gene
+            try:
+                name = gene.symbol
+            except AttributeError:
+                try:
+                    name = gene.__name__
+                except AttributeError:
+                    name = gene
 
             # It is discouraged, but names may be longer than 1
             if len(name) > 1:
