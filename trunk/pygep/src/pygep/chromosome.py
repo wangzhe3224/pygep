@@ -15,7 +15,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from pygep.util import cache
-from random import choice
+from random import choice, randint
 import functools
 
 
@@ -79,15 +79,18 @@ class Chromosome(object):
 
         for _ in xrange(n):
             yield cls([choice(cls.symbols)   for _ in xrange(head)] + \
-                      [choice(cls.terminals) for _ in xrange(tail)])
+                      [choice(cls.terminals) for _ in xrange(tail)], head)
 
 
-    def __init__(self, genes):
+    def __init__(self, genes, head):
         '''
         Instantiates a chromsome instance and analyzes it for evaluation.
         Sets the self.coding index to the last gene in the coding region.
+        @param genes: full list of genes
+        @param head:  length (not index) of the chromosome head
         '''
         self.genes = genes
+        self.head  = head
 
         # Starts at the first gene and determines how many args it requires.
         # Then moves forward that many args and sums their required args.
@@ -168,3 +171,19 @@ class Chromosome(object):
         '''Abstract base method for fitness determination'''
         raise NotImplementedError('Must override Chromosome.fitness')
 
+
+    def mutate(self):
+        '''Produces a new chromosome via point mutation'''
+        # Select which gene to mutate
+        index = randint(0, len(self)-1)
+
+        # Mutation within the tail can only use terminals
+        if index >= self.head:
+            gene = choice(self.terminals)
+        else:
+            gene = choice(self.symbols)
+
+        # Build the new chromosome
+        genes = list(self.genes)
+        genes[index] = gene
+        return type(self)(genes, self.head)

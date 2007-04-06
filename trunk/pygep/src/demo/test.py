@@ -4,13 +4,14 @@ from pygep.util import cache
 import math, random, sys
 
 # The functin we are trying to find
-def target(x):
-    return 4 * x
+def target(x, y):
+    return 4 * x + y
 
 # Generate a random sample to test against
 class Data(object):
     def __init__(self, a):
         self.a = a
+        self.b = 1
 
 # The functions we use in our chromosome
 @symbol('*')
@@ -41,17 +42,26 @@ def Q(x):
 # The chromsomes: fitness is accuracy over the sample
 class Regression(Chromosome):
     functions = multiply, add, subtract, divide, Q
-    terminals = 'a',
+    terminals = 'a', 'b'
     sample = [Data(float(random.randint(1, 10))) for _ in xrange(25)]
 
     @cache
     def fitness(self):
-        diff = 0
+        good = 0
         for data in self.sample:
-            diff += float(abs(target(data.a) - self.evaluate(data))) / data.a
+            desired = float(target(data.a, 1))
+            closeness = abs((self.evaluate(data)-desired) / desired)
+            if closeness < .1:
+                good += 3
+            elif abs(closeness) < .25:
+                good += 1
 
-        return -diff
+        return good
+
 
 p = Population(Regression, 30, 10)
 for i in p:
+    m = i.mutate()
     print i, i.fitness()
+    print m, m.fitness()
+    print
