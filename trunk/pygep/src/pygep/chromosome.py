@@ -102,9 +102,7 @@ class Chromosome(object):
         s = ''
         for gene in self.genes:
             # Differentiate between functions and terminals
-            name = gene
-            if callable(gene):
-                name = gene.__name__
+            name = gene.__name__ if callable(gene) else gene
 
             # It is discouraged, but names may be longer than 1
             if len(name) > 1:
@@ -120,14 +118,18 @@ class Chromosome(object):
         Evaluates a given GEP chromosome against some instance.  The
         terminals in the chromosome are assumed to be attributes on
         the object instance provided.
+        @param obj: an object instance with terminal attributes set
+        @return: result of evaluating the chromosome
         '''
         # Start by clearing out our eval list
         for i, gene in enumerate(self.genes):
             self._eval[i] = None if callable(gene) else getattr(obj, gene)
 
+        # Evaluate the chromosome against obj in reverse
         index = self.coding + 1
         for i in reversed(xrange(index)):
             gene = self.genes[i]
+
             if callable(gene):
                 num  = gene.func_code.co_argcount
                 args = self._eval[index-num:index]
