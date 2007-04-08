@@ -14,24 +14,29 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-from itertools import chain
+from itertools import chain, izip
 from random import choice
 import string
 
 
 class Population(object):
-    def __init__(self, cls, size, head):
+    def __init__(self, cls, size, head, genes=1, linker=lambda x: x):
         '''
         Generates a population of some chromsome class
-        @param cls:  Chromosome type
-        @param size: population size
-        @param head: chromosome head length
+        @param cls:    Chromosome type
+        @param size:   population size
+        @param head:   chromosome head length
+        @param genes:  number of genes
+        @param linker: multigenic results linker function
         '''
-        self.size = size
-        self.head = head
+        self.size   = size
+        self.head   = head
+        self.genes  = genes
+        self.linker = linker
 
         # Start an initial population
-        self.population = [i for i in cls.generate(size, head)]
+        self.population = [i for _, i in izip(xrange(size),
+                           cls.generate(head, genes, linker))]
 
         # Header for display purposes
         try:

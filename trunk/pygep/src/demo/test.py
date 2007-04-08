@@ -10,8 +10,8 @@ def target(x, y):
 # Generate a random sample to test against
 class Data(object):
     def __init__(self, a):
-        self.a = a
-        self.b = 1
+        self.a = float(a)
+        self.b = 1.0
 
 # The functions we use in our chromosome
 @symbol('*')
@@ -33,15 +33,9 @@ def divide(x, y):
     except ZeroDivisionError:
         return sys.maxint
 
-def Q(x):
-    try:
-        return math.sqrt(x)
-    except ValueError:
-        return 0.0
-
 # The chromsomes: fitness is accuracy over the sample
 class Regression(Chromosome):
-    functions = multiply, add, subtract, divide, Q
+    functions = multiply, add, subtract, divide
     terminals = 'a', 'b'
     sample = [Data(float(random.randint(1, 10))) for _ in xrange(25)]
 
@@ -58,10 +52,9 @@ class Regression(Chromosome):
 
         return good
 
-
-p = Population(Regression, 30, 10)
+#p = Population(Regression, 30, 7)
+p = Population(Regression, 30, 7, 5, lambda *args: sum(args))
+d = Data(2)
 for i in p:
-    m = i.mutate()
-    print i, i.fitness()
-    print m, m.fitness()
-    print
+    print i, i.evaluate(d)
+
