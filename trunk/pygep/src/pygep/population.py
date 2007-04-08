@@ -16,10 +16,18 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from itertools import izip
 from operator import attrgetter
+from pygep.util import stats
 import random, string
 
 
 class Population(object):
+    '''
+    A Population instance has the following default configuration:
+        - selection_pressure: sigma-scaled pressure (1.2 to 2)
+    '''
+    selection_pressure = 2.0
+
+
     def __init__(self, cls, size, head, genes=1, linker=lambda x: x):
         '''
         Generates a population of some chromsome class
@@ -40,6 +48,7 @@ class Population(object):
         self.population = [i for _, i in izip(xrange(size),
                            cls.generate(head, genes, linker))]
         self._next_pop = [None] * size # placeholder for next generation
+        self._scaled   = [None] * size # fitness scaling
 
         # Header for display purposes
         try:
@@ -53,6 +62,10 @@ class Population(object):
 
     def __repr__(self):
         return '\n'.join([str(i) for i in [self.header] + self.population])
+
+
+    def __len__(self):
+        return self.size
 
 
     def __iter__(self):
@@ -76,9 +89,36 @@ class Population(object):
         # Copy the best individual via simple elitism
         self._next_pop[0] = self.best
 
-        # Randomly fill in the rest.  TODO: use fitness scaling here
-        for i in xrange(1, self.size):
-            self._next_pop[i] = random.choice(self.population)
+        # Fill in the rest through fitness scaling. First compute the
+        # sigma-scaled fitness proportionate value for each chromosome.
+        mean, stdev = stats.fitness_stats(self)
+        for i, c in enumerate(self.population):
+            scaled = c.fitness - (mean - (self.selection_pressure * mean))
+            self._scaled[i] = max(scaled, 0.0)
+        scaling = sum(self._scaled)
+
+        # Then generate n-1 spins of the roulette wheel
+        select = [random.random() * scaling for _ in xrange(self.size-1)]
+        select.sort()
+       
+        # Moved through the current population, calculating a window
+        # for each scaled fitness.  However many of the sorted roulette
+        # spins are within that window yields the number of copies.
+        window = self._scaled[0]
+        source, target = 0, 1
+        for scaled in select:
+            # Move to the element that covers our range
+            while window < scaled:
+                source += 1
+                try:
+                    window += self._scaled[source]
+                except IndexError: # possible floating-point errors
+                    source = self.size - 1
+                    break
+            
+            # Copy this element to the next generation
+            self._next_pop[target] = self.population[source]
+            target += 1
 
         # Switch to the next generation and increment age
         self._next_pop, self.population = self.population, self._next_pop

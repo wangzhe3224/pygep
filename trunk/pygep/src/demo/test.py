@@ -52,7 +52,7 @@ class Regression(Chromosome):
         return good
 
 #p = Population(Regression, 30, 7)
-p = Population(Regression, 5, 7, 4, lambda *args: sum(args))
+p = Population(Regression, 30, 7, 4, lambda *args: sum(args))
 print p.age, p.best.fitness
 print p
 print
