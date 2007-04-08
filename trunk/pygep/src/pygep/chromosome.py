@@ -41,6 +41,7 @@ class MetaChromosome(type):
     type.  Sets the following attributes on a chromosome class:
         - arity:   maximum functional arity
         - symbols: symbols that can reside in the head
+    Also turns caching of fitness values on for all chromosomes.
     '''
     def __new__(typ, *args, **kwds):
         t = type.__new__(typ, *args, **kwds)
@@ -52,6 +53,8 @@ class MetaChromosome(type):
         except ValueError:
             t.arity = 0
 
+        # Cache fitness values
+        t.fitness = cache(t.fitness)    
         return t
 
 

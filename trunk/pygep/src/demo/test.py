@@ -39,7 +39,6 @@ class Regression(Chromosome):
     terminals = 'a', 'b'
     sample = [Data(float(random.randint(1, 10))) for _ in xrange(25)]
 
-    @cache
     def fitness(self):
         good = 0
         for data in self.sample:
@@ -56,5 +55,5 @@ class Regression(Chromosome):
 p = Population(Regression, 2, 7, 4, lambda *args: sum(args))
 d = Data(2)
 for i in p:
-    print i, i.evaluate(d)
+    print i, i.fitness()
 
