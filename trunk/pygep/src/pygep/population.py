@@ -34,6 +34,8 @@ class Population(object):
         self.genes  = genes
         self.linker = linker
 
+        self.__age = 1
+
         # Start an initial population
         self.population = [i for _, i in izip(xrange(size),
                            cls.generate(head, genes, linker))]
@@ -53,3 +55,7 @@ class Population(object):
 
     def __iter__(self):
         return iter(self.population)
+
+
+    age = property(lambda self: self.__age, doc='Generation number')
+

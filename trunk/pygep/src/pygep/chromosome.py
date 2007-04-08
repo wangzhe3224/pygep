@@ -65,6 +65,7 @@ class Chromosome(object):
         - terminals: sequence of terminal symbols
     '''
     __metaclass__ = MetaChromosome
+    __next_id = 1
 
     functions = ()
     terminals = ()
@@ -107,6 +108,10 @@ class Chromosome(object):
 
         # Useful information: the length of each gene
         self._gene_length = len(self) / self.genes
+
+        # Unique number of the organism
+        self.__id = type(self).__next_id
+        type(self).__next_id += 1
         
         # Determine coding indexes for each gene:
         self.coding = ()
@@ -167,6 +172,10 @@ class Chromosome(object):
     def _child(self, chromosome):
         '''Returns a child chromosome of self'''
         return type(self)(chromosome, self.head, self.genes, self.linker)
+
+    
+    # Unique ID of the organism
+    id = property(lambda self: self.__id, doc='Organism #')
 
 
     def evaluate(self, obj):
