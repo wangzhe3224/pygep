@@ -14,9 +14,9 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-from itertools import chain, izip
-from random import choice
-import string
+from itertools import izip
+from operator import attrgetter
+import random, string
 
 
 class Population(object):
@@ -39,12 +39,14 @@ class Population(object):
         # Start an initial population
         self.population = [i for _, i in izip(xrange(size),
                            cls.generate(head, genes, linker))]
+        self._next_pop = [None] * size # placeholder for next generation
 
         # Header for display purposes
         try:
             l = len(self.population[0])
             self.header = string.digits * (l / len(string.digits)) + \
                           string.digits[:(l % len(string.digits))]
+            self.header += '\n' + '-' * len(self.header)
         except IndexError:
             raise ValueError('Empty populations are meaningless!')
 
@@ -57,5 +59,28 @@ class Population(object):
         return iter(self.population)
 
 
-    age = property(lambda self: self.__age, doc='Generation number')
+    age  = property(lambda self: self.__age, doc='Generation number')
+    best = property(
+        lambda self: max(self.population, key=attrgetter('fitness')), 
+        doc='The best Chromosome of the current generation'
+    )
+
+
+    def solve(self, generations):
+        '''Cycles a number of generations. Stops if chrom.solved()'''
+        pass
+
+
+    def cycle(self):
+        '''Selects and recombines the next generation'''
+        # Copy the best individual via simple elitism
+        self._next_pop[0] = self.best
+
+        # Randomly fill in the rest.  TODO: use fitness scaling here
+        for i in xrange(1, self.size):
+            self._next_pop[i] = random.choice(self.population)
+
+        # Switch to the next generation and increment age
+        self._next_pop, self.population = self.population, self._next_pop
+        self.__age += 1
 

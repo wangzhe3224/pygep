@@ -54,7 +54,7 @@ class MetaChromosome(type):
             t.arity = 0
 
         # Cache fitness values
-        t.fitness = cache(t.fitness)    
+        t._fitness = cache(t._fitness)    
         return t
 
 
@@ -63,6 +63,9 @@ class Chromosome(object):
     A Chromosome must provide these attributes:
         - functions: sequence of nonterminals symbols
         - terminals: sequence of terminal symbols
+    And override these functions:
+        - _fitness: fitness of a given individual
+        - _solved:  True if the problem is optimally solved (optional)
     '''
     __metaclass__ = MetaChromosome
     __next_id = 1
@@ -207,11 +210,18 @@ class Chromosome(object):
         return self.linker(*self._eval[0:len(self):self._gene_length])
 
 
-    def fitness(self):
+    def _fitness(self):
         '''Abstract base method for fitness determination'''
-        raise NotImplementedError('Must override Chromosome.fitness')
+        raise NotImplementedError('Must override Chromosome._fitness')
 
+    def _solved(self):
+        '''Defaults to False.  Override to terminate early.'''
+        return False
 
+    fitness = property(lambda self: self._fitness(), doc='Fitness value')
+    solved  = property(lambda self: self._solved(),  doc='Problem solved')
+
+    
     def mutate(self):
         '''Produces a new chromosome via point mutation'''
         # Select which gene to mutate

@@ -39,7 +39,7 @@ class Regression(Chromosome):
     terminals = 'a', 'b'
     sample = [Data(float(random.randint(1, 10))) for _ in xrange(25)]
 
-    def fitness(self):
+    def _fitness(self):
         good = 0
         for data in self.sample:
             desired = float(target(data.a, 1))
@@ -52,8 +52,12 @@ class Regression(Chromosome):
         return good
 
 #p = Population(Regression, 30, 7)
-p = Population(Regression, 2, 7, 4, lambda *args: sum(args))
-d = Data(2)
-for i in p:
-    print i, i.fitness()
+p = Population(Regression, 5, 7, 4, lambda *args: sum(args))
+print p.age, p.best.fitness
+print p
+print
+
+p.cycle()
+print p.age, p.best.fitness
+print p
 
