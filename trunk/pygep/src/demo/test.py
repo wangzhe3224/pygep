@@ -53,7 +53,7 @@ class Regression(Chromosome):
         return good
 
 #p = Population(Regression, 30, 7)
-p = Population(Regression, 30, 7, 5, lambda *args: sum(args))
+p = Population(Regression, 2, 7, 4, lambda *args: sum(args))
 d = Data(2)
 for i in p:
     print i, i.evaluate(d)

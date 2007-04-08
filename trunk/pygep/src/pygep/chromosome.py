@@ -16,8 +16,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from itertools import izip
 from pygep.util import cache
-from random import choice, randint
-import functools
+import functools, random
 
 
 def symbol(s):
@@ -83,8 +82,8 @@ class Chromosome(object):
             chromosome = []
             for _ in xrange(genes):
                 chromosome.extend(
-                    [choice(cls.symbols)   for _ in xrange(head)] + \
-                    [choice(cls.terminals) for _ in xrange(tail)]
+                    [random.choice(cls.symbols)   for _ in xrange(head)] + \
+                    [random.choice(cls.terminals) for _ in xrange(tail)]
                 )
             yield cls(chromosome, head, genes, linker)
 
@@ -204,17 +203,60 @@ class Chromosome(object):
     def mutate(self):
         '''Produces a new chromosome via point mutation'''
         # Select which gene to mutate
-        start = choice(self._gene_starts)
-        index = randint(0, self._gene_length-1)
+        start = random.choice(self._gene_starts)
+        index = random.randint(0, self._gene_length-1)
 
         # Mutation within the tail can only use terminals
         if index >= self.head:
-            gene = choice(self.terminals)
+            gene = random.choice(self.terminals)
         else:
-            gene = choice(self.symbols)
+            gene = random.choice(self.symbols)
 
         # Build the new chromosome
         chromosome = list(self.chromosome)
         chromosome[start+index] = gene
         return self._child(chromosome)
+
+
+    def crossover_one_point(self, other):
+        '''
+        Produces two children via one-point crossover
+        @param other: second parent
+        @return: child 1, child 2
+        '''
+        index = random.randint(0, len(self)-1)
+        child1 = self.chromosome[:index] + other.chromosome[index:]
+        child2 = other.chromosome[:index] + self.chromosome[index:]
+        return self._child(child1), self._child(child2)
+
+
+    def crossover_two_point(self, other):
+        '''
+        Produces two children via two-point crossover
+        @param other: second parent
+        @return: child 1, child 2
+        '''
+        indexes = random.sample(xrange(len(self)), 2)
+        i1, i2 = min(indexes), max(indexes) 
+        p1, p2 = self.chromosome, other.chromosome
+
+        child1 = p1[:i1] + p2[i1:i2] + p1[i2:]
+        child2 = p2[:i1] + p1[i1:i2] + p2[i2:]
+        return self._child(child1), self._child(child2)
+
+
+    def crossover_gene(self, other):
+        '''
+        Produces two children via full gene crossover
+        @param other: second parent
+        @return: child 1, child 2
+        '''
+        # Choose a random gene
+        i1 = random.choice(self._gene_starts)
+        i2 = i1 + self._gene_length
+        p1, p2 = self.chromosome, other.chromosome
+
+        child1 = p1[:i1] + p2[i1:i2] + p1[i2:]
+        child2 = p2[:i1] + p1[i1:i2] + p2[i2:]
+        return self._child(child1), self._child(child2)
 
