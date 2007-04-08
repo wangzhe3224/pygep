@@ -24,8 +24,16 @@ class Population(object):
     '''
     A Population instance has the following default configuration:
         - selection_pressure: sigma-scaled pressure (1.2 to 2)
+        - mutation_rate: probability that each organism mutates
+        - crossover_one_point_rate: probability of 1-point crossover
+        - crossover_two_point_rate: probability of 2-point crossover
+        - crossover_gene_rate: probability of full gene crossover
     '''
-    selection_pressure = 2.0
+    selection_pressure       = 1.2
+    mutation_rate            = 0.005
+    crossover_one_point_rate = 0.3
+    crossover_two_point_rate = 0.3
+    crossover_gene_rate      = 0.1
 
 
     def __init__(self, cls, size, head, genes=1, linker=lambda x: x):
@@ -119,6 +127,29 @@ class Population(object):
             # Copy this element to the next generation
             self._next_pop[target] = self.population[source]
             target += 1
+
+        # Recombination section:
+        # First try and mutate each individual
+        for i, c in enumerate(self._next_pop):
+            if random.random() < self.mutation_rate:
+                print 'MUTATE', i
+                self._next_pop[i] = c.mutate()
+
+        # Then try one|two-point and gene crossover
+        if random.random() < self.crossover_one_point_rate:
+           i1, i2 = random.sample(xrange(self.size), 2)
+           p1, p2 = self._next_pop[i1], self._next_pop[i2]
+           self._next_pop[i1], self._next_pop[i2] = p1.crossover_one_point(p2)
+
+        if random.random() < self.crossover_two_point_rate:
+           i1, i2 = random.sample(xrange(self.size), 2)
+           p1, p2 = self._next_pop[i1], self._next_pop[i2]
+           self._next_pop[i1], self._next_pop[i2] = p1.crossover_two_point(p2)
+           
+        if random.random() < self.crossover_gene_rate:
+           i1, i2 = random.sample(xrange(self.size), 2)
+           p1, p2 = self._next_pop[i1], self._next_pop[i2]
+           self._next_pop[i1], self._next_pop[i2] = p1.crossover_gene(p2)
 
         # Switch to the next generation and increment age
         self._next_pop, self.population = self.population, self._next_pop
