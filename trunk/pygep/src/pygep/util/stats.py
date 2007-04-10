@@ -20,7 +20,7 @@ import math
 def fitness_stats(population):
     '''
     Computes fitness statistics for a given population
-    @return: (mean, standard devation)
+    @return: (mean, standard devation, sum)
     '''
     num   = float(len(population))
     total = sum(i.fitness for i in population)
@@ -29,5 +29,5 @@ def fitness_stats(population):
     variance  = sum((i.fitness - mean) ** 2 for i in population)
     deviation = math.sqrt((1/num) * variance)
 
-    return mean, deviation
+    return mean, deviation, float(total)
 

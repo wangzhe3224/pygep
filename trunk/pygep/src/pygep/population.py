@@ -23,14 +23,14 @@ import random, string
 class Population(object):
     '''
     A Population instance has the following default configuration:
-        - selection_pressure: sigma-scaled pressure (1.2 to 2)
+        - exclusion_level: selection pressure (typically 1.5)
         - mutation_rate: probability that each organism mutates
         - crossover_one_point_rate: probability of 1-point crossover
         - crossover_two_point_rate: probability of 2-point crossover
         - crossover_gene_rate: probability of full gene crossover
     '''
-    selection_pressure       = 1.2
-    mutation_rate            = 0.005
+    exclusion_level          = 1.5
+    mutation_rate            = 0.044
     crossover_one_point_rate = 0.3
     crossover_two_point_rate = 0.3
     crossover_gene_rate      = 0.1
@@ -99,17 +99,16 @@ class Population(object):
 
         # Fill in the rest through fitness scaling. First compute the
         # sigma-scaled fitness proportionate value for each chromosome.
-        mean, stdev = stats.fitness_stats(self)
+        mean, stdev, total = stats.fitness_stats(self)
         for i, c in enumerate(self.population):
-            scaled = c.fitness - (mean - (self.selection_pressure * mean))
-            self._scaled[i] = max(scaled, 0.0)
+            self._scaled[i] = self.exclusion_level * c.fitness / mean
         scaling = sum(self._scaled)
 
         # Then generate n-1 spins of the roulette wheel
         select = [random.random() * scaling for _ in xrange(self.size-1)]
         select.sort()
 
-        # Moved through the current population, calculating a window
+        # Move through the current population, calculating a window
         # for each scaled fitness.  However many of the sorted roulette
         # spins are within that window yields the number of copies.
         window = self._scaled[0]
