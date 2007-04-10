@@ -24,13 +24,27 @@ class Population(object):
     '''
     A Population instance has the following default configuration:
         - exclusion_level: selection pressure (typically 1.5)
-        - mutation_rate: probability that each organism mutates
+        - mutation_rate:   probability that each organism mutates
+        - inversion_rate:  probability each organism inverts
+        - is_transposition_rate:    probability of non-root transposition
+        - is_transposition_length:  possible IS transposition lengths
+        - ris_transposition_rate:   probability of root transposition
+        - ris_transposition_length: possible IS transposition lengths
+        - gene_transposition_rate:  probability of gene transposition
         - crossover_one_point_rate: probability of 1-point crossover
         - crossover_two_point_rate: probability of 2-point crossover
-        - crossover_gene_rate: probability of full gene crossover
+        - crossover_gene_rate:      probability of full gene crossover
+    Mutation, by default, is set to a rate where it will modify
+    about two loci per chromosome.
     '''
     exclusion_level          = 1.5
-    mutation_rate            = 0.044
+    mutation_rate            = 0.0 # Set by __init__
+    inversion_rate           = 0.1
+    is_transposition_rate    = 0.1
+    is_transposition_length  = 1,2,3
+    ris_transposition_rate   = 0.1
+    ris_transposition_length = 1,2,3
+    gene_transposition_rate  = 0.1
     crossover_one_point_rate = 0.3
     crossover_two_point_rate = 0.3
     crossover_gene_rate      = 0.1
@@ -67,9 +81,18 @@ class Population(object):
         except IndexError:
             raise ValueError('Empty populations are meaningless!')
 
+        # Determine mutation rate
+        self.mutation_rate = 2.0 / l
+
 
     def __repr__(self):
-        return '\n'.join([str(i) for i in [self.header] + self.population])
+        header = '[Generation: %s  |  Best of Generation: #%s (%s)]\n%s' % \
+            (self.age, self.best.id, self.best.fitness, self.header)
+        max_id_len = max(len(str(i.id)) for i in self)
+        return '\n'.join([header] + [
+            '%s [%s]: %s' % (i, str(i.id).rjust(max_id_len), i.fitness)
+            for i in self
+        ])
 
 
     def __len__(self):
@@ -101,7 +124,10 @@ class Population(object):
         # sigma-scaled fitness proportionate value for each chromosome.
         mean, stdev, total = stats.fitness_stats(self)
         for i, c in enumerate(self.population):
-            self._scaled[i] = self.exclusion_level * c.fitness / mean
+            try:
+                self._scaled[i] = self.exclusion_level * c.fitness / mean
+            except ZeroDivisionError:
+                self._scaled[i] = self.exclusion_level * c.fitness
         scaling = sum(self._scaled)
 
         # Then generate n-1 spins of the roulette wheel
@@ -127,27 +153,54 @@ class Population(object):
             self._next_pop[target] = self.population[source]
             target += 1
 
-        # Recombination section:
-        # First try and mutate each individual
-        if self.mutation_rate:
-            for i, c in enumerate(self._next_pop):
-                self._next_pop[i] = c.mutate(self.mutation_rate)
+        # Recombination section - always exclude best
+        #
+        # Mutation occurs potentially for each allele in each chromosome
+        # Inversion & transposition are considered for each chromosome
+        for i in xrange(1, self.size):
+            # Try and mutate each individual
+            if self.mutation_rate:
+                self._next_pop[i] = self._next_pop[i].mutate(
+                                        self.mutation_rate)
+            # Then inversion
+            if self.inversion_rate and random.random() < self.inversion_rate:
+                self._next_pop[i] = self._next_pop[i].invert()
 
-        # Then try one|two-point and gene crossover
-        if random.random() < self.crossover_one_point_rate:
-           i1, i2 = random.sample(xrange(self.size), 2)
-           p1, p2 = self._next_pop[i1], self._next_pop[i2]
-           self._next_pop[i1], self._next_pop[i2] = p1.crossover_one_point(p2)
+            # Insertion Sequence transposition
+            if self.is_transposition_rate and \
+               random.random() < self.is_transposition_rate:
+                self._next_pop[i] = self._next_pop[i].transpose_is(
+                    random.choice(self.is_transposition_length))
 
-        if random.random() < self.crossover_two_point_rate:
-           i1, i2 = random.sample(xrange(self.size), 2)
-           p1, p2 = self._next_pop[i1], self._next_pop[i2]
-           self._next_pop[i1], self._next_pop[i2] = p1.crossover_two_point(p2)
+            # Root Insert Sequence transposition
+            if self.ris_transposition_rate and \
+               random.random() < self.ris_transposition_rate:
+                self._next_pop[i] = self._next_pop[i].transpose_ris(
+                    random.choice(self.ris_transposition_length))
 
-        if random.random() < self.crossover_gene_rate:
-           i1, i2 = random.sample(xrange(self.size), 2)
-           p1, p2 = self._next_pop[i1], self._next_pop[i2]
-           self._next_pop[i1], self._next_pop[i2] = p1.crossover_gene(p2)
+            # Gene transposition
+            if self.gene_transposition_rate and \
+               random.random() < self.gene_transposition_rate:
+                self._next_pop[i] = self._next_pop[i].transpose_gene()
+
+        # Then try one|two-point and gene crossover - exclude best
+        if self.crossover_one_point_rate and \
+           random.random() < self.crossover_one_point_rate:
+            i1, i2 = random.sample(xrange(1, self.size), 2)
+            p1, p2 = self._next_pop[i1], self._next_pop[i2]
+            self._next_pop[i1], self._next_pop[i2] = p1.crossover_one_point(p2)
+
+        if self.crossover_two_point_rate and \
+           random.random() < self.crossover_two_point_rate:
+            i1, i2 = random.sample(xrange(1, self.size), 2)
+            p1, p2 = self._next_pop[i1], self._next_pop[i2]
+            self._next_pop[i1], self._next_pop[i2] = p1.crossover_two_point(p2)
+
+        if self.crossover_gene_rate and \
+           random.random() < self.crossover_gene_rate:
+            i1, i2 = random.sample(xrange(1, self.size), 2)
+            p1, p2 = self._next_pop[i1], self._next_pop[i2]
+            self._next_pop[i1], self._next_pop[i2] = p1.crossover_gene(p2)
 
         # Switch to the next generation and increment age
         self._next_pop, self.population = self.population, self._next_pop

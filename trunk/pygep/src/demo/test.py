@@ -4,14 +4,13 @@ from pygep.util import cache
 import math, random, sys
 
 # The functin we are trying to find
-def target(x, y):
-    return 4 * x + y
+def target(x):
+    return 3 * (x ** 2) + (2 * x)
 
 # Generate a random sample to test against
 class Data(object):
     def __init__(self, a):
         self.a = float(a)
-        self.b = 1.0
 
 # The functions we use in our chromosome
 @symbol('*')
@@ -36,28 +35,34 @@ def divide(x, y):
 # The chromsomes: fitness is accuracy over the sample
 class Regression(Chromosome):
     functions = multiply, add, subtract, divide
-    terminals = 'a', 'b'
-    sample = [Data(float(random.randint(1, 10))) for _ in xrange(25)]
+    terminals = 'a',
+
+    selection_range = 100.0
+    range_low, range_high = -10.0, 10.0
+    range_size = range_high - range_low
+    sample = [Data(range_low + (random.random() * range_size)) for _ in xrange(10)]
+    max_fitness = selection_range * len(sample)
 
     def _fitness(self):
-        good = 0
-        for data in self.sample:
-            desired = float(target(data.a, 1))
-            closeness = abs((self.evaluate(data)-desired) / desired)
-            if closeness < .1:
-                good += 3
-            elif abs(closeness) < .25:
-                good += 1
+        #print self.range_size, self.evaluate(self.sample[0]), target(self.sample[0].a)
+        return int(max(sum(self.selection_range - abs(self.evaluate(x)-target(x.a))
+                           for x in self.sample), 0.0))
 
-        return good
+    def _solved(self):
+        return self.fitness >= self.max_fitness
 
-#p = Population(Regression, 30, 7)
-p = Population(Regression, 30, 7, 4, lambda *args: sum(args))
-print p.age, p.best.fitness
-print p
-print
+if __name__ == '__main__':
+    # Search for a solution
+    p = Population(Regression, 20, 6, 3, lambda *args: sum(args))
+    print p
 
-p.cycle()
-print p.age, p.best.fitness
-print p
+    for _ in xrange(50):
+        if p.best.solved:
+            break
+        p.cycle()
+        print
+        print p
 
+    if p.best.solved:
+        print
+        print 'SOLVED:', p.best
