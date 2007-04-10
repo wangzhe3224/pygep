@@ -158,7 +158,7 @@ class Chromosome(object):
                 try:
                     name = gene.__name__
                 except AttributeError:
-                    name = gene
+                    name = str(gene)
 
             # Truncate any name longer than 1 char
             s += name[:1] or '?'
@@ -191,7 +191,15 @@ class Chromosome(object):
         '''
         # Start by clearing out our eval list
         for i, gene in enumerate(self.chromosome):
-            self._eval[i] = None if callable(gene) else getattr(obj, gene)
+            self._eval[i] = None
+            if callable(gene):
+                self._eval[i] = None
+            elif not isinstance(gene, str):
+                # could be a number
+                self._eval[i] = gene
+            else:
+                self._eval[i] = getattr(obj, gene)
+
 
         # Evaluate each chromosome gene against obj in reverse
         for coding, start in izip(self.coding, self._gene_starts):

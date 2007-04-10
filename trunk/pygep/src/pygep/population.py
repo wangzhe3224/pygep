@@ -64,7 +64,7 @@ class Population(object):
         self.genes  = genes
         self.linker = linker
 
-        self.__age = 1
+        self.__age = 0
 
         # Start an initial population
         self.population = [i for _, i in izip(xrange(size),
@@ -111,7 +111,8 @@ class Population(object):
 
     age  = property(lambda self: self.__age, doc='Generation number')
     best = property(
-        lambda self: max(self.population, key=attrgetter('fitness')),
+        # Gives preference to later individuals tied for best
+        lambda self: max(reversed(self.population), key=attrgetter('fitness')),
         doc='The best Chromosome of the current generation'
     )
 
