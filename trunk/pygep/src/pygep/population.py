@@ -83,11 +83,12 @@ class Population(object):
 
         # Determine mutation rate
         self.mutation_rate = 2.0 / l
+        self._update_stats()
 
 
     def __repr__(self):
-        header = '[Generation: %s  |  Best of Generation: #%s (%s)]\n%s' % \
-            (self.age, self.best.id, self.best.fitness, self.header)
+        header = '[Generation: %s  |  Best: #%s (%s)  |  Mean: %0.1f]\n%s' % \
+            (self.age, self.best.id, self.best.fitness, self.mean, self.header)
         max_id_len = max(len(str(i.id)) for i in self)
         return '\n'.join([header] + [
             '%s [%s]: %s' % (i, str(i.id).rjust(max_id_len), i.fitness)
@@ -101,6 +102,11 @@ class Population(object):
 
     def __iter__(self):
         return iter(self.population)
+
+
+    def _update_stats(self):
+        # Compute fitness stats for the entire population
+        self.mean, self.stdev, _ = stats.fitness_stats(self)
 
 
     age  = property(lambda self: self.__age, doc='Generation number')
@@ -122,10 +128,9 @@ class Population(object):
 
         # Fill in the rest through fitness scaling. First compute the
         # sigma-scaled fitness proportionate value for each chromosome.
-        mean, stdev, total = stats.fitness_stats(self)
         for i, c in enumerate(self.population):
             try:
-                self._scaled[i] = self.exclusion_level * c.fitness / mean
+                self._scaled[i] = self.exclusion_level * c.fitness / self.mean
             except ZeroDivisionError:
                 self._scaled[i] = self.exclusion_level * c.fitness
         scaling = sum(self._scaled)
@@ -205,4 +210,4 @@ class Population(object):
         # Switch to the next generation and increment age
         self._next_pop, self.population = self.population, self._next_pop
         self.__age += 1
-
+        self._update_stats()
