@@ -82,7 +82,7 @@ class Population(object):
 
     age  = property(lambda self: self.__age, doc='Generation number')
     best = property(
-        lambda self: max(self.population, key=attrgetter('fitness')), 
+        lambda self: max(self.population, key=attrgetter('fitness')),
         doc='The best Chromosome of the current generation'
     )
 
@@ -108,7 +108,7 @@ class Population(object):
         # Then generate n-1 spins of the roulette wheel
         select = [random.random() * scaling for _ in xrange(self.size-1)]
         select.sort()
-       
+
         # Moved through the current population, calculating a window
         # for each scaled fitness.  However many of the sorted roulette
         # spins are within that window yields the number of copies.
@@ -123,17 +123,16 @@ class Population(object):
                 except IndexError: # possible floating-point errors
                     source = self.size - 1
                     break
-            
+
             # Copy this element to the next generation
             self._next_pop[target] = self.population[source]
             target += 1
 
         # Recombination section:
         # First try and mutate each individual
-        for i, c in enumerate(self._next_pop):
-            if random.random() < self.mutation_rate:
-                print 'MUTATE', i
-                self._next_pop[i] = c.mutate()
+        if self.mutation_rate:
+            for i, c in enumerate(self._next_pop):
+                self._next_pop[i] = c.mutate(self.mutation_rate)
 
         # Then try one|two-point and gene crossover
         if random.random() < self.crossover_one_point_rate:
@@ -145,7 +144,7 @@ class Population(object):
            i1, i2 = random.sample(xrange(self.size), 2)
            p1, p2 = self._next_pop[i1], self._next_pop[i2]
            self._next_pop[i1], self._next_pop[i2] = p1.crossover_two_point(p2)
-           
+
         if random.random() < self.crossover_gene_rate:
            i1, i2 = random.sample(xrange(self.size), 2)
            p1, p2 = self._next_pop[i1], self._next_pop[i2]

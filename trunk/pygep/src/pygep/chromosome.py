@@ -54,7 +54,7 @@ class MetaChromosome(type):
             t.arity = 0
 
         # Cache fitness values
-        t._fitness = cache(t._fitness)    
+        t._fitness = cache(t._fitness)
         return t
 
 
@@ -115,15 +115,15 @@ class Chromosome(object):
         # Unique number of the organism
         self.__id = type(self).__next_id
         type(self).__next_id += 1
-        
+
         # Determine coding indexes for each gene:
         self.coding = ()
         for start in self._gene_starts:
             # How to find the length of a single coding region:
             #
             # Start at the first gene and determine how many args it
-            # requires. Then move forward that many args and sum their 
-            # required args. Continue this until there are no more 
+            # requires. Then move forward that many args and sum their
+            # required args. Continue this until there are no more
             # required args. The resulting index will be one gene past
             # the coding region for the current gene
             index, args = start, 1
@@ -176,7 +176,7 @@ class Chromosome(object):
         '''Returns a child chromosome of self'''
         return type(self)(chromosome, self.head, self.genes, self.linker)
 
-    
+
     # Unique ID of the organism
     id = property(lambda self: self.__id, doc='Organism #')
 
@@ -206,7 +206,7 @@ class Chromosome(object):
                     # Replace the operation in self._eval with its return val
                     self._eval[i] = gene(*args)
                     index -= num
-       
+
         return self.linker(*self._eval[0:len(self):self._gene_length])
 
 
@@ -221,23 +221,33 @@ class Chromosome(object):
     fitness = property(lambda self: self._fitness(), doc='Fitness value')
     solved  = property(lambda self: self._solved(),  doc='Problem solved')
 
-    
-    def mutate(self):
-        '''Produces a new chromosome via point mutation'''
-        # Select which gene to mutate
-        start = random.choice(self._gene_starts)
-        index = random.randint(0, self._gene_length-1)
 
-        # Mutation within the tail can only use terminals
-        if index >= self.head:
-            gene = random.choice(self.terminals)
-        else:
-            gene = random.choice(self.symbols)
-
-        # Build the new chromosome
+    def mutate(self, rate):
+        '''
+        Produces a new chromosome via potential point mutation on each
+        locus.  If nothing changes, the original chromosome is returned.
+        '''
         chromosome = list(self.chromosome)
-        chromosome[start+index] = gene
-        return self._child(chromosome)
+
+        # Traverse the chromosome gene by gene
+        for start in self._gene_starts:
+            # Then locus by locus
+            for i in xrange(self._gene_length):
+                # Do we mutate this locus?
+                if random.random() < rate:
+                    # Mutation within the tail can only use terminals
+                    if i >= self.head:
+                        gene = random.choice(self.terminals)
+                    else:
+                        gene = random.choice(self.symbols)
+
+                    chromosome[start+i] = gene
+
+        # Only create a new chromosome if it is actually different
+        if chromosome != self.chromosome:
+            return self._child(chromosome)
+        else:
+            return self
 
 
     def crossover_one_point(self, other):
@@ -259,7 +269,7 @@ class Chromosome(object):
         @return: child 1, child 2
         '''
         indexes = random.sample(xrange(len(self)), 2)
-        i1, i2 = min(indexes), max(indexes) 
+        i1, i2 = min(indexes), max(indexes)
         p1, p2 = self.chromosome, other.chromosome
 
         child1 = p1[:i1] + p2[i1:i2] + p1[i2:]
