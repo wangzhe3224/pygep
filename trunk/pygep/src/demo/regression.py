@@ -1,4 +1,5 @@
-from pygep.chromosome import Chromosome, symbol
+from pygep.chromosome import Chromosome
+from pygep.functions.arithmetic import *
 from pygep.population import Population
 import math, random
 
@@ -9,28 +10,10 @@ def target(x):
     return 3*(x.a**2) + (2*x.a) + 1
 
 
-# Generate a random sample to test against
+# Data objects to test against
 class Data(object):
     def __init__(self, a):
         self.a = float(a)
-
-
-# The functions we use in our chromosome
-@symbol('*')
-def multiply(x, y):
-    return x * y
-
-@symbol('+')
-def add(x, y):
-    return x + y
-
-@symbol('-')
-def subtract(x, y):
-    return x - y
-
-@symbol('/')
-def divide(x, y):
-    return x / y
 
 
 # The chromsomes: fitness is accuracy over the sample
@@ -69,3 +52,4 @@ if __name__ == '__main__':
     if p.best.solved:
         print
         print 'SOLVED:', p.best
+

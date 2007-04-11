@@ -1,5 +1,6 @@
 from tests.cache import CacheTest
 from tests.chromosome import ChromosomeTest
+from tests.functions import *
 from tests.stats import FitnessStatsTest
 from tests.variation import *
 import unittest
