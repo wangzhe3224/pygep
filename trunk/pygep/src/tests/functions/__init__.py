@@ -1,4 +1,5 @@
 from tests.functions.comparison import ComparisonTest
+from tests.functions.logic import LogicTest
 import unittest
 
 

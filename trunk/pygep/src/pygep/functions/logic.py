@@ -18,34 +18,35 @@ from pygep.chromosome import symbol
 
 
 '''
-Provides basic comparison non-terminals.  If each is true, it returns
-the first value given.  If false, it returns the second.
+Provides basic logical operators: and, or, not, if.  The former 
+three will return boolean values, whereas if returns one of the
+values passed in, so be careful mixing these with other operators.
 '''
 
 
-__all__ = 'equal', 'unequal', 'less', 'greater'
+__all__ = 'and_op', 'or_op', 'not_op', 'if_op'
 
 
-@symbol('=')
-def equal(x, y):
-    '''Returns x if x == y else y'''
-    return x if x == y else y
+@symbol('&')
+def and_op(x, y):
+    '''Returns x and y'''
+    return x and y
 
 
-@symbol('U')
-def unequal(x, y):
-    '''Returns x if x != y else y'''
-    return x if x != y else y
+@symbol('|')
+def or_op(x, y):
+    '''Returns x or y'''
+    return x or y
 
 
-@symbol('<')
-def less(x, y):
-    '''Returns x if x < y else y'''
-    return x if x < y else y
+@symbol('!')
+def not_op(x):
+    '''Returns not x'''
+    return not x
 
 
-@symbol('>')
-def greater(x, y):
-    '''Returns x if x > y else y'''
-    return x if x > y else y
+@symbol('I')
+def if_op(x, y, z):
+    '''Returns y if x else z'''
+    return y if x else z
 

@@ -10,10 +10,16 @@ def target(x):
     return 3*(x.a**2) + (2*x.a) + 1
 
 
-# Data objects to test against
+# Data points to test against
+SELECTION_RANGE = 100.0
+RANGE_LOW, RANGE_HIGH = -10.0, 10.0
+RANGE_SIZE = RANGE_HIGH - RANGE_LOW
 class Data(object):
     def __init__(self, a):
         self.a = float(a)
+
+NUM = 10
+SAMPLE = [Data(RANGE_LOW + (random.random() * RANGE_SIZE)) for _ in xrange(NUM)]
 
 
 # The chromsomes: fitness is accuracy over the sample
@@ -22,19 +28,16 @@ class Regression(Chromosome):
     terminals = 'a', 1, 2
 
     selection_range = 100.0
-    range_low, range_high = -10.0, 10.0
-    range_size = range_high - range_low
-    sample = [Data(range_low + (random.random() * range_size)) for _ in xrange(10)]
     
     def _fitness(self):
         try:
-            return int(max(sum(self.selection_range - abs(self.evaluate(x)-target(x))
-                               for x in self.sample), 0.0))
+            total = sum(SELECTION_RANGE - abs(self.evaluate(x)-target(x)) for x in SAMPLE)
+            return int(max(total, 0.0))
         except:
             return 0
 
     def _solved(self):
-        return self.fitness >= (self.selection_range * len(self.sample))
+        return self.fitness >= (SELECTION_RANGE * NUM)
 
 
 if __name__ == '__main__':
