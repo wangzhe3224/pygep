@@ -33,7 +33,6 @@ def divide(x, y):
     return x / y
 
 
-
 # The chromsomes: fitness is accuracy over the sample
 class Regression(Chromosome):
     functions = multiply, add, subtract, divide
