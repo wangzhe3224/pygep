@@ -23,7 +23,8 @@ the first value given.  If false, it returns the second.
 '''
 
 
-__all__ = 'equal', 'unequal', 'less', 'greater'
+__all__ = 'equal', 'unequal', 'less', 'greater', \
+          'less_or_equal', 'greater_or_equal'
 
 
 @symbol('=')
@@ -49,3 +50,14 @@ def greater(x, y):
     '''Returns x if x > y else y'''
     return x if x > y else y
 
+
+@symbol('L')
+def less_or_equal(x, y):
+    '''Returns x if x <= y else y'''
+    return x if x <= y else y
+
+
+@symbol('G')
+def greater_or_equal(x, y):
+    '''Returns x if x >= y else y'''
+    return x if x >= y else y

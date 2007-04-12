@@ -15,6 +15,7 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from pygep.chromosome import symbol
+import math
 
 
 '''
@@ -26,7 +27,7 @@ of nonviable organisms to 0.
 '''
 
 
-__all__ = 'add', 'subtract', 'multiply', 'divide'
+__all__ = 'add', 'subtract', 'multiply', 'divide', 'power', 'root'
 
 
 @symbol('*')
@@ -55,3 +56,17 @@ def divide(x, y):
     '''
     return x / y
 
+
+@symbol('^')
+def power(x, y):
+    '''Returns x ** y'''
+    return x ** y
+
+
+@symbol('Q')
+def root(x):
+    '''
+    Returns square root of x
+    @raises ValueError
+    '''
+    return math.sqrt(x)

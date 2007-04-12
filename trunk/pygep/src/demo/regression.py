@@ -1,7 +1,9 @@
+#!/usr/bin/env python2.5
 from pygep.chromosome import Chromosome
 from pygep.functions.arithmetic import *
+from pygep.functions.linkers import sum_linker
 from pygep.population import Population
-import math, random
+import random
 
 
 # The function we are trying to find
@@ -28,7 +30,7 @@ class Regression(Chromosome):
     terminals = 'a', 1, 2
 
     selection_range = 100.0
-    
+
     def _fitness(self):
         try:
             total = sum(SELECTION_RANGE - abs(self.evaluate(x)-target(x)) for x in SAMPLE)
@@ -42,7 +44,7 @@ class Regression(Chromosome):
 
 if __name__ == '__main__':
     # Search for a solution
-    p = Population(Regression, 20, 6, 3, lambda *args: sum(args))
+    p = Population(Regression, 20, 6, 3, sum_linker)
     print p
 
     for _ in xrange(50):
