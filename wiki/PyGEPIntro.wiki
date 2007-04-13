@@ -1,0 +1,23 @@
+#summary Introduction to PyGEP
+
+_Latest release: PyGEP-0.1-beta_
+
+= What is it? =
+
+PyGEP is a simple library suitable for academic study of GEP (Gene Expression Programming) in Python, aiming for ease of use and rapid implementation.
+
+ It provides standard multigenic chromosomes; a population class using elitism and fitness scaling for selection; mutation, crossover and transposition operators; and some standard GEP functions and linkers.
+
+= What does it do? =
+
+PyGEP provide an implementation of most standard GEP components:
+  * Unigenic and multigenic chromosomes and evaluation
+  * Populations and generational cycling
+  * Mutation, crossover, and transposition operators
+  * Function libraries for arithmetic, logic and comparison
+  * Multigenic linkers
+
+= How do I use it? =
+
+There are a couple [http://pygep.googlecode.com/svn/tags/pygep-0.1-beta/src/demo/ demos] available based on those in [http://gene-expression-programming.com/GEPBiblio.asp the papers of Ferreira].  Check back here soon for a [wiki:SymbolicRegressionTutorial tutorial].
+
