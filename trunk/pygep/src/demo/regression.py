@@ -26,8 +26,6 @@ class Regression(Chromosome):
     functions = multiply, add, subtract, divide
     terminals = 'x', 1, 2
 
-    selection_range = 100.0
-
     def _fitness(self):
         try:
             total = sum(SELECTION_RANGE - abs(self.evaluate(x)-x.y) 
