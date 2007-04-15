@@ -20,7 +20,14 @@
 Provides linkers for combining multigenic chromosomes.  In general
 PyGEP linkers should accept and process any number of arguments,
 thus the use of *args.
+
+Most common linkers:
+    - sum_linker: equivalent to sigma.  Sums results of sub-ETs.
+    - or_linker:  boolean OR of results of sub-ETs
 '''
+
+
+__all__ = 'sum_linker', 'or_linker'
 
 
 def sum_linker(*args):

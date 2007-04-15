@@ -61,11 +61,32 @@ class MetaChromosome(type):
 class Chromosome(object):
     '''
     A Chromosome must provide these attributes:
-        - functions: sequence of nonterminals symbols
-        - terminals: sequence of terminal symbols
+        - functions: tuple of nonterminals
+        - terminals: tuple of terminal symbols
+
     And override these functions:
         - _fitness: fitness of a given individual
         - _solved:  True if the problem is optimally solved (optional)
+
+    An example Chromosome that evolves simple arithmetic expressions
+    on data objects providing attributes 'a' and 'b' and the constants
+    1 and 2:
+
+        from pygep.functions.arithmetic import *
+        from pygep import Chromosome
+
+        class Calculation(Chromosome):
+            functions = multiply, add, subtract, divide
+            terminals = 'a', 1, 2
+
+            def _fitness(self):
+                # Evaluate chromosome fitness here.
+                # This often involves calling self.evaluate(something)
+
+            def _solved(self):
+                # Not required, but useful if the problem can
+                # be optimally solved.  Usually this just means
+                # checking self.fitness.
     '''
     __metaclass__ = MetaChromosome
     __next_id = 1
@@ -98,7 +119,12 @@ class Chromosome(object):
     def __init__(self, chromosome, head, genes, linker):
         '''
         Instantiates a chromsome instance and analyzes it for evaluation.
-        Sets the self.coding tuple to the last genes in the coding regions.
+        Sets the self.coding tuple to the last genes in the coding regions
+        and various other internal data for the chromosome.  Note that it
+        is generally unwise to instantiate chromosomes manually.  It is
+        much more common to create them via calls to the static method
+        Chromosome.generate(...).
+
         @param chromosome: combined list of all genes
         @param head:       length (not index) of the gene heads
         @param genes:      number of genes in the chromosome
@@ -185,7 +211,8 @@ class Chromosome(object):
         '''
         Evaluates a given GEP chromosome against some instance.  The
         terminals in the chromosome are assumed to be attributes on
-        the object instance provided.
+        the object instance provided (unless they are numeric constants).
+
         @param obj: an object instance with terminal attributes set
         @return:    result of evaluating the chromosome
         '''
@@ -234,6 +261,7 @@ class Chromosome(object):
         '''
         Produces a new chromosome via potential point mutation on each
         locus.  If nothing changes, the original chromosome is returned.
+
         @param rate: mutation rate per locus
         @return: child chromosome (or self)
         '''

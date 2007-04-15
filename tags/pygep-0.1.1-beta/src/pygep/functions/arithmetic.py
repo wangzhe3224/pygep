@@ -24,6 +24,14 @@ Any semantic exceptions (ZeroDivisionError, etc.) are passed up
 the call chain to the user.  Typically one should catch any
 exceptions when calling chromosome.evaluate() and set the fitness
 of nonviable organisms to 0.
+
+Common mathematical non-terminal functions and symbols:
+    - (*) multiply
+    - (+) add
+    - (-) subtract
+    - (/) divide
+    - (^) power
+    - (Q) root
 '''
 
 
@@ -70,3 +78,4 @@ def root(x):
     @raises ValueError
     '''
     return math.sqrt(x)
+
