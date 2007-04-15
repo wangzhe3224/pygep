@@ -1,0 +1,179 @@
+#summary Demo of Function Finding in PyGEP
+
+= Introduction =
+Symbolic regression is a common GEP demonstration.  For this one we'll consider the regression.py demo in PyGEP's source repository.
+
+= Details =
+== Step 1: Defines the target function ==
+First we define our target function (in this case f(x) = 3x^2^ + 2x + 1) and a class to represent data points.  Note this class has two attributes: `x`, the given value, and `y`, the target value.
+{{{
+#!/usr/bin/env python2.5
+from pygep.functions.arithmetic import *
+from pygep.functions.linkers import sum_linker
+from pygep import *
+import random
+
+
+# Data points to test against and target function
+SAMPLE = []
+class DataPoint(object):
+    RANGE_LOW, RANGE_HIGH = -10.0, 10.0
+    RANGE_SIZE = RANGE_HIGH - RANGE_LOW
+
+    def __init__(self, x):
+        self.x = float(x)
+
+        # The function we are trying to find
+        # f(x) = 3x^2 + 2x + 1
+        self.y = 3*(x**2) + (2*x) + 1
+}}}
+
+== Step 2: Create a chromosome and fitness function ==
+The functions for our Regression chromosome are imported from `pygep.functions.arithmetic` .  We allow these functions to operate on `x` attribute of data points and the constants 1 and 2.  The fitness of a given chromosome is its accuracy in determining a data point's `y` value.  We've found an optimal solution if all sample points are predicted exactly.
+{{{
+# The chromsomes: fitness is accuracy over the sample
+SELECTION_RANGE = 100.0
+class Regression(Chromosome):
+    functions = multiply, add, subtract, divide
+    terminals = 'x', 1, 2
+
+    def _fitness(self):
+        try:
+            total = sum(SELECTION_RANGE - abs(self.evaluate(x)-x.y) 
+                        for x in SAMPLE)
+            return int(max(total, 0.0))
+        except:
+            return 0
+
+    def _solved(self):
+        return self.fitness >= (SELECTION_RANGE * NUM)
+}}}
+
+== Step 3: Create a population and run it against our sample ==
+Here we create a sample of data points and initialize a Population of Regression chromosomes with size 20, head length 6, 3 genes per chromosome, and using the sum linker.  We cycle the population for 50 generations, or until it finds an optimal solution.
+{{{
+if __name__ == '__main__':
+    # Create a random sample of data points
+    NUM = 10
+    for _ in xrange(NUM):
+        x = DataPoint.RANGE_LOW + (random.random() * DataPoint.RANGE_SIZE)
+        SAMPLE.append(DataPoint(x))
+
+    # Search for a solution
+    p = Population(Regression, 20, 6, 3, sum_linker)
+    print p
+
+    for _ in xrange(50):
+        if p.best.solved:
+            break
+        p.cycle()
+        print
+        print p
+
+    if p.best.solved:
+        print
+        print 'SOLVED:', p.best
+}}}
+
+And that's about it!  Here's an example run of the above code:
+{{{
+[Generation: 0  |  Best: #9 (481)  |  Mean: 139.7]
+012345678901234567890123456789012345678
+---------------------------------------
+-2-1/2xx221x1-11/x/22x121x*/2--22x1222x [ 1]: 90
+1/21//222221x*+--//x221122-x*x2-2x12221 [ 2]: 102
+2/x122xx1222x-*-/*+x222xx11/2-121122212 [ 3]: 101
+1xx/x221xx212212x2+x2121x21+*2111x2x1x2 [ 4]: 118
++1++*/x121111/+2//x1x22xx11++2+/x21xxx1 [ 5]: 127
+++*1xxx112x1xx1-*1x2222221/-1*-/1x1xxx2 [ 6]: 412
+/22+1+x21112x/-2*/2212x212/*xxx12xxx1x1 [ 7]: 111
++/2--12222x212x+**121xx1212/1xxxx1xx11x [ 8]: 0
++2+1*xxx11122-**++-22212x2+x-+-*11112x2 [ 9]: 481
+1-*1-+1xx21x2x*1/1x12x2212x/+/112xx2x21 [10]: 91
++-*/*+xxx1x1x11+*-x2122xxx2*x/-12x2xx21 [11]: 420
+*-/*/-212x122221/+11x1122xx*/+1-2211x11 [12]: 103
++x*/2122111x2x1*-2-1x12221-2**2+2x2xx22 [13]: 27
++--x12x1x1x21x+*+1-1122x2x22/-**x122xxx [14]: 111
+/+-x212222212/-1x22x212x12xx+/2111x2112 [15]: 43
+111/+2x2x11221*++1x2212112111+2x121121x [16]: 110
+---x1*x21221x*-*2++1121x11x-*--+x222xx2 [17]: 41
+2*x*+-1xx112x-/121+x2xxx211/2x/2x2x1212 [18]: 118
+-*/--/211x2x1/2*++*122x1xx*-*12/x1x2x12 [19]: 76
+2*-1+121xxx2xx*/+1+22x212212x*x-1221112 [20]: 111
+
+[Generation: 1  |  Best: #9 (481)  |  Mean: 230.2]
+012345678901234567890123456789012345678
+---------------------------------------
++2+1*xxx11122-**++-22212x2+x-+-*11112x2 [ 9]: 481
+-2-1/22xx21x1-11/x/222121x*/2--21x1222x [21]: 104
+12/21/222221x*+--//x221122-x*x2-2x12221 [22]: 102
+2/x122xx1222x-*-/*+x222xx11/2-121122212 [ 3]: 101
+1xx/x221xx2x2212x2+x2121x21+*-111x2x1x2 [23]: 118
+1xx/x221xx222212x2+x2121x21+*2111x2x1x2 [24]: 118
+1/xxx221xx212212x2+x2111x21+*2111x2xx2x [42]: 118
+1/x-x221xx212212x2+x2121x11//2111x2x1x2 [27]: 118
++1++*/x121111/+-//x1x22xx11++2+/x21x2x1 [28]: 131
+++*1xxx112x1xx1-*1x2212221/-1*-/1x1xxx1 [29]: 412
+++*1xxx112x1xx1-*1x2222221/-1*-/2x1xxx2 [30]: 420
+++*1xxx112x1x*-1*-/1x1xxx2x1-2*12222221 [33]: 412
+-+*1x+x112x1xx1-/1x2222221/-1*-/1x1x2x2 [34]: 102
++2+/*xx211222-**++-22212x2+x-+-211112x2 [35]: 213
++2+1*xxx11122-**++-22212x2+x-+-*11112x2 [ 9]: 481
++-*/*+xxx2x1x-1+*-x21222xx2*x/-12x2x1x2 [41]: 408
++-*/*2xxx1x1x11+*-x2122xxx2*x/-12x2xx21 [37]: 119
++-*/*+xxx1x1x11+*-x2122xxx2*x/-12x2xx21 [11]: 420
+-*/+/-212x122221/+11x1122xx*++1-1211x11 [39]: 99
+2*-1+121xxx2x2*/+1+22x212212x*x-1221112 [40]: 126
+
+... snip ...
+
+[Generation: 10  |  Best: #220 (760)  |  Mean: 508.2]
+012345678901234567890123456789012345678
+---------------------------------------
+*2+1*xxx1x122-**++/2221212+*-*+-11x2221 [199]: 760
+*2+1**xx12122-**++/2221212+*-*+-11x2221 [220]: 760
+*2+11*xx12122-**++/2221212+*-*+-11x2221 [221]: 202
+*1+1*xxx12122-**++/22x1212+*-*+-11x2221 [222]: 429
+*2+1*xxx12122-**++/22x1212/*-*+-11x2221 [223]: 0
+*2+1*xxx12x22x**-+/2221222+*-*+-11x2221 [224]: 697
+-**+2+22212x2+++--+1111221*2+1*+xx1x122 [225]: 739
+-*12-+22112x2+++--+1111221*2+-+2xx12122 [228]: 166
+-**+2+22212x2*2+1*xxxx2122*2+1*+xx12122 [239]: 647
++2+-+*12112x1-*1x+/22212x2+xx+**xx1x112 [203]: 127
+*2+1*+xx1x122-**++/22211x2+2--/xx2111x1 [230]: 740
+*2+2*xxx12122+2-*+-11x2221x**++*2x21212 [209]: 716
+*2+2*xxx12122x**++/2221212++2-*+11x2121 [232]: 741
+*2+2*xxx12122x**++/2221212+2-*/211x2x21 [233]: 734
+-1+**+2221222*2+1*xxx12122+2-*+-11x2221 [234]: 631
+/2x**+2221222*2+1*xxx12122+2-*+-11x2221 [214]: 704
+/2x**+2221222+/+--+111122122-*+-11x2221 [238]: 136
+*2+1*x1x22122+2-*+-11x2221-*2+-/2221212 [236]: 93
+*2*1*xxx22122+2-*+-11x2221-**+-/2221212 [237]: 661
++2+1*xxx11122-*2++1222x2x2+--*-*1x212x1 [219]: 481
+
+[Generation: 11  |  Best: #245 (1000)  |  Mean: 561.4]
+012345678901234567890123456789012345678
+---------------------------------------
+*2+1**xx12122-**++/2221212+*-*+-11x2221 [220]: 760
+*2/1*xx2xx122-**++/2221212+*-*+-11x2221 [240]: 175
+**+1*xxx1x1x1-**++/2221212+*-*+-11x1221 [241]: 755
+*2+1*xxx2x122-**/+/2221212+*-*+-11xx221 [242]: 960
+**+1**xx12122-**++/2221212+*-*+-11x2221 [243]: 463
+x1+1*xxx22122-**++/22x1212+*-*+-11x2221 [244]: 124
+*2+1*xxx12x22x**-+/2221222+*-*+-11x2221 [224]: 697
+*2+1*xxx12x22x**-+/2221222+*-x+-11x222x [245]: 1000
+*2+1*+xx1x122-*-++/22211x2+2--/xx2111x1 [246]: 747
+*2+1x+xx1x122-*2++1222x2xx+--*2*12211x1 [261]: 198
+*2+2*xxx12122+2-*+-11x2221x**++*2211212 [248]: 716
+*2+2*xxxx2222x**++/2221212++2-*+11x2121 [249]: 741
+*2+2*xxx12122x**++/2x21212++2-*+1xx2121 [250]: 924
+*2+2*xxx12122x-*++/22x1212++2-*+11x2121 [251]: 741
+*x+1-*2221222*2+1*xxx12122+2-*+-11x2221 [253]: 714
+-1+**+2221212*2+1*xxx121x2+2-*+-11x2221 [254]: 631
+/2x**+2221222*221*xxx12122+-1+2111x2221 [256]: 128
+/2x**/2221222*2++1*xx12122+2-*+-11x2221 [258]: 107
++-+1*xxx11122-**++/22211x2+2--/xx2212xx [260]: 166
++2+1*xxx11122-*2++1222x2x2+--*-*1x212x1 [219]: 481
+
+SOLVED: *2+1*xxx12x22x**-+/2221222+*-x+-11x222x
+}}}
