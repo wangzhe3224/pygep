@@ -1,8 +1,7 @@
 #!/usr/bin/env python2.5
-from pygep.chromosome import Chromosome
 from pygep.functions.arithmetic import *
 from pygep.functions.linkers import sum_linker
-from pygep.population import Population
+from pygep import *
 import random
 
 
@@ -33,7 +32,8 @@ class Regression(Chromosome):
 
     def _fitness(self):
         try:
-            total = sum(SELECTION_RANGE - abs(self.evaluate(x)-target(x)) for x in SAMPLE)
+            total = sum(SELECTION_RANGE - abs(self.evaluate(x)-target(x)) 
+                        for x in SAMPLE)
             return int(max(total, 0.0))
         except:
             return 0

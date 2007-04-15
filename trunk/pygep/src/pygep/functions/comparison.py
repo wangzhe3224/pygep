@@ -20,6 +20,14 @@ from pygep.chromosome import symbol
 '''
 Provides basic comparison non-terminals.  If each is true, it returns
 the first value given.  If false, it returns the second.
+
+Common comparison non-terminal functions:
+    - (=) equal
+    - (U) unequal
+    - (<) less
+    - (>) greater
+    - (L) less_or_equal
+    - (G) greater_or_equal
 '''
 
 
@@ -61,3 +69,4 @@ def less_or_equal(x, y):
 def greater_or_equal(x, y):
     '''Returns x if x >= y else y'''
     return x if x >= y else y
+

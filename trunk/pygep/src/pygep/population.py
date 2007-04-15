@@ -23,19 +23,31 @@ import random, string
 class Population(object):
     '''
     A Population instance has the following default configuration:
-        - exclusion_level: selection pressure (typically 1.5)
-        - mutation_rate:   probability that each organism mutates
-        - inversion_rate:  probability each organism inverts
-        - is_transposition_rate:    probability of non-root transposition
-        - is_transposition_length:  possible IS transposition lengths
-        - ris_transposition_rate:   probability of root transposition
-        - ris_transposition_length: possible IS transposition lengths
-        - gene_transposition_rate:  probability of gene transposition
-        - crossover_one_point_rate: probability of 1-point crossover
-        - crossover_two_point_rate: probability of 2-point crossover
-        - crossover_gene_rate:      probability of full gene crossover
+        - exclusion_level:          selection pressure (typically 1.5)
+        - mutation_rate:            probability of mutation (2 per chromosome)
+        - inversion_rate:           inversion probability (0.1)
+        - is_transposition_rate:    non-root transposition (0.1)
+        - is_transposition_length:  IS transposition lengths (1,2,3)
+        - ris_transposition_rate:   root transposition rate (0.1)
+        - ris_transposition_length: RIS transposition lengths (1,2,3)
+        - gene_transposition_rate:  gene transposition rate (0.1)
+        - crossover_one_point_rate: 1-point crossover rate (0.3)
+        - crossover_two_point_rate: 2-point crossover rate (0.3)
+        - crossover_gene_rate:      full gene crossover (0.1)
+
     Mutation, by default, is set to a rate where it will modify
-    about two loci per chromosome.
+    about two loci per chromosome.  Example Population usage::
+
+        from pygep.functions.linkers import *
+        from pygep import *
+
+        p = Population(Chromosome, population-size, head-length, 
+                       number-genes, ET-linker-function)
+              
+        for _ in xrange(50): # maximum number of generations
+            if p.best.solved:
+                break
+            p.cycle() # recombine and select next generation
     '''
     exclusion_level          = 1.5
     mutation_rate            = 0.0 # Set by __init__

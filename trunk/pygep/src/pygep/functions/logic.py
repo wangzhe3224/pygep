@@ -21,6 +21,12 @@ from pygep.chromosome import symbol
 Provides basic logical operators: and, or, not, if.  The former 
 three will return boolean values, whereas if returns one of the
 values passed in, so be careful mixing these with other operators.
+
+Common logic non-terminal functions:
+    - (&) and_op
+    - (|) or_op
+    - (!) not_op
+    - (I) if_op
 '''
 
 

@@ -1,9 +1,8 @@
 #!/usr/bin/env python2.5
-from pygep.chromosome import Chromosome
+from pygep import *
 from pygep.functions.arithmetic import *
 from pygep.functions.comparison import *
 from pygep.functions.linkers import sum_linker
-from pygep.population import Population
 import string, sys
 
 
@@ -44,8 +43,9 @@ TRAIN_BENIGN = TRAIN_MALIG = 0
 # Our chromosomes attempt to determine which tumors are
 # benign and which are not
 class TumorEvaluator(Chromosome):
-    functions = multiply, add, subtract, divide, power, root, \
-                equal, unequal, less, greater, less_or_equal, greater_or_equal
+    functions = (multiply, add, subtract, divide, power, root, \
+                 equal, unequal, less, greater, less_or_equal, \
+                 greater_or_equal) * 5
     terminals = VARS
 
     def _fitness(self):
@@ -91,10 +91,10 @@ if __name__ == '__main__':
             TRAIN_MALIG += 1
 
     # Create our population and find a solution
-    p = Population(TumorEvaluator, 50, 8, 3, sum_linker)
+    p = Population(TumorEvaluator, 50, 8, 4, sum_linker)
     print p
 
-    for _ in xrange(500):
+    for _ in xrange(50):
         if p.best.solved:
             break
         p.cycle()
