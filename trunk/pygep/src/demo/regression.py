@@ -5,34 +5,32 @@ from pygep import *
 import random
 
 
-# The function we are trying to find
-def target(x):
-    # 3x^2 + 2x + 1
-    return 3*(x.a**2) + (2*x.a) + 1
+# Data points to test against and target function
+SAMPLE = []
+class DataPoint(object):
+    RANGE_LOW, RANGE_HIGH = -10.0, 10.0
+    RANGE_SIZE = RANGE_HIGH - RANGE_LOW
 
+    def __init__(self, x):
+        self.x = float(x)
 
-# Data points to test against
-SELECTION_RANGE = 100.0
-RANGE_LOW, RANGE_HIGH = -10.0, 10.0
-RANGE_SIZE = RANGE_HIGH - RANGE_LOW
-class Data(object):
-    def __init__(self, a):
-        self.a = float(a)
+        # The function we are trying to find
+        # f(x) = 3x^2 + 2x + 1
+        self.y = 3*(x**2) + (2*x) + 1
 
-NUM = 10
-SAMPLE = [Data(RANGE_LOW + (random.random() * RANGE_SIZE)) for _ in xrange(NUM)]
 
 
 # The chromsomes: fitness is accuracy over the sample
+SELECTION_RANGE = 100.0
 class Regression(Chromosome):
     functions = multiply, add, subtract, divide
-    terminals = 'a', 1, 2
+    terminals = 'x', 1, 2
 
     selection_range = 100.0
 
     def _fitness(self):
         try:
-            total = sum(SELECTION_RANGE - abs(self.evaluate(x)-target(x)) 
+            total = sum(SELECTION_RANGE - abs(self.evaluate(x)-x.y) 
                         for x in SAMPLE)
             return int(max(total, 0.0))
         except:
@@ -43,6 +41,12 @@ class Regression(Chromosome):
 
 
 if __name__ == '__main__':
+    # Create a random sample of data points
+    NUM = 10
+    for _ in xrange(NUM):
+        x = DataPoint.RANGE_LOW + (random.random() * DataPoint.RANGE_SIZE)
+        SAMPLE.append(DataPoint(x))
+
     # Search for a solution
     p = Population(Regression, 20, 6, 3, sum_linker)
     print p
