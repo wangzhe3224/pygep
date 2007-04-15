@@ -9,15 +9,15 @@ PyGEP is a simple library suitable for academic study of GEP (Gene Expression Pr
 = What does it do? =
 
 PyGEP provide an implementation of most standard GEP components:
-  * Unigenic and multigenic [wiki:ApiChromosomes chromosomes]
-  * [wiki:ApiPopulations Populations] and generational cycling
-  * Mutation, crossover, and transposition [wiki:ApiVariation operators]
-  * [wiki:ApiFunctionLibraries Function libraries] for arithmetic, logic and comparison
-  * Multigenic [wki:ApiLinkers linker functions]
+  * ApiChromosomes: unigenic and multigenic chromosomes
+  * ApiPopulations: populations and generational cycling
+  * ApiVariation: mutation, crossover, and transposition operators
+  * ApiFunctionLibraries: libraries for arithmetic, logic and comparison non-terminal functions
+  * ApiLinkers: multigenic linker functions
 
 = How do I use it? =
 
-There are a couple [http://pygep.googlecode.com/svn/tags/pygep-0.1-beta/src/demo/ demos] available based on those in [http://gene-expression-programming.com/GEPBiblio.asp the papers of Ferreira].  Check back here soon for a [wiki:SymbolicRegressionTutorial tutorial].
+There are a couple [http://pygep.googlecode.com/svn/tags/pygep-0.1-beta/src/demo/ demos] available based on those in [http://gene-expression-programming.com/GEPBiblio.asp the papers of Ferreira].  Check back here soon for a SymbolicRegressionTutorial.
 
 
 
