@@ -6,8 +6,8 @@ These is the development road map going toward a 1.0 release.  I'll add tickets 
 
 = Future PyGEP Releases =
 == v0.2 ==
- * Performance enhancement of population cycling and chromosome evaluation - this hasn't even been breeched yet.
- * It may be useful to change multigenic chromosomes so that, instead of being one list, they are collections of unigenic chromosomes.  That way they could cache sub-ET evaluation results between chromosomes.
+ * Ticket #2: Performance enhancement of population cycling and chromosome evaluation - this hasn't even been breeched yet.
+ * Ticket #3: It may be useful to change multigenic chromosomes so that, instead of being one list, they are collections of unigenic chromosomes.  That way they could cache sub-ET evaluation results between chromosomes.
 
 == v0.3 ==
  * More demos!
