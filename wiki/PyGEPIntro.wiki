@@ -1,6 +1,6 @@
 #summary Introduction to PyGEP
 
-_Latest release: PyGEP-0.1.1-beta_
+_Latest release: PyGEP-0.1.2-beta_
 
 = What is it? =
 
@@ -17,4 +17,3 @@ PyGEP provide an implementation of most standard GEP components:
 = How do I use it? =
 
 There are a couple [http://pygep.googlecode.com/svn/tags/pygep-0.1-beta/src/demo/ demos] available based on those in [http://gene-expression-programming.com/GEPBiblio.asp the papers of Ferreira].  For a quick start see the SymbolicRegressionTutorial.
-
