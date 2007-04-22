@@ -1,0 +1,5 @@
+#summary PyGEP Change Log
+
+=== 0.1.2.beta ===
+ * Issue #4 fixed: using random selection for population means of 0
+ * Updated symbolic regression demo
