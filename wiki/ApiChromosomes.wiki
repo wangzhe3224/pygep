@@ -2,7 +2,7 @@
 
 = Introduction =
 
-PyGEP provides a Chromosome base class which mus be overridden to provide problem-specific expression trees and fitness functions.  Chromosomes provides the standard GEP variation operators (ApiVariation), require  non-terminal functions (ApiFunctionLibraries), and are managed by Populations (ApiPopulations).
+PyGEP provides a Chromosome base class which must be overridden to provide problem-specific expression trees and fitness functions.  Chromosomes provide the standard GEP variation operators, require both terminal symbols and non-terminal functions (ApiFunctionLibraries), and are managed by Populations (ApiPopulations).
 
 = Required Attributes =
  * *functions*: tuple of nonterminals.  These should be actual function with a positive arity.  To specify a symbol for a nonterminal function, preface it with the `@symbol` decorator in `pygep.chromosome`.  Otherwise, it will be represented by the first letter in its name.
