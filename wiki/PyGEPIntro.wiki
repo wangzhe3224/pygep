@@ -1,4 +1,5 @@
 #summary Introduction to PyGEP
+#labels Featured
 
 = What is it? =
 PyGEP is a simple library suitable for academic study of GEP (Gene Expression Programming) in Python, aiming for ease of use and rapid implementation.
