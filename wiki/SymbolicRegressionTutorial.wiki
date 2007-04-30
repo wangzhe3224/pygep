@@ -1,4 +1,5 @@
 #summary Demo of Function Finding in PyGEP
+#labels Featured
 
 = Introduction =
 Symbolic regression is a common GEP demonstration.  For this one we'll consider the regression.py demo in PyGEP's source repository.
