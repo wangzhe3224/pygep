@@ -1,4 +1,5 @@
 #summary PyGEP Change Log
+#labels Featured
 
 === 0.1.2.beta ===
  * Issue #4 fixed: using random selection for population means of 0
