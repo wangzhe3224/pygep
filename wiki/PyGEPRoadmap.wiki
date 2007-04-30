@@ -1,5 +1,5 @@
 #summary Where is PyGEP going?
-#labels Phase-Requirements
+#labels Phase-Requirements,Featured
 
 = Introduction =
 This is the development road map going toward a 1.0 release.  I'll add tickets to these as they become pertinent.
