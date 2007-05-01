@@ -1,9 +1,15 @@
 from setuptools import setup, find_packages
+import sys
+
+
+# TODO: once issue 7 goes away, remove this code
+if sys.version_info[:2] < (2, 5):
+    raise Exception('PyGEP requires Python 2.5')
 
 
 setup(
     name         = 'PyGEP',
-    version      = '0.1.2',
+    version      = '0.1.3',
     license      = 'GPL',
     description  = 'Gene Expression Programming for Python',
     author       = "Ryan J. O'Neil",
@@ -11,7 +17,7 @@ setup(
     url          = 'http://code.google.com/p/pygep',
     download_url = 'http://code.google.com/p/pygep/downloads/list',
 
-    install_requires = ['python>=2.5'],
+    #install_requires = ['python>=2.5'], # 7: setuptools issue for win32
 
     package_dir = {'': 'src'},
     packages    = find_packages('src', exclude=['tests', 'tests.*']),
