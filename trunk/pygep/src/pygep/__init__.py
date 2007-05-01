@@ -21,6 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 from pygep.chromosome import Chromosome
 from pygep.population import Population
 
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 __all__ = 'Chromosome', 'Population'
 

@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name         = 'PyGEP',
-    version      = '0.1.1',
+    version      = '0.1.2',
     license      = 'GPL',
     description  = 'Gene Expression Programming for Python',
     author       = "Ryan J. O'Neil",

@@ -100,8 +100,8 @@ class Chromosome(object):
     def generate(cls, head, genes=1, linker=lambda x: x):
         '''
         Returns a generator of random GEP chromosomes
-        @param genes:  number of genes
-        @param head:   head length
+        @param genes:  number of genes (min=1)
+        @param head:   head length (min=0)
         @param linker: linking function
         '''
         tail = head * (cls.arity - 1) + 1
@@ -126,10 +126,16 @@ class Chromosome(object):
         Chromosome.generate(...).
 
         @param chromosome: combined list of all genes
-        @param head:       length (not index) of the gene heads
-        @param genes:      number of genes in the chromosome
+        @param head:       length (not index) of the gene heads (min=0)
+        @param genes:      number of genes in the chromosome (min=1)
         @param linker:     linker function for gene evaluation
         '''
+        # Must have at least one gene and a head length of 0
+        if head < 0:
+            raise ValueError('Head length must be at least 0')
+        if genes < 1:
+            raise ValueError('Must have at least 1 gene')
+
         self.chromosome = chromosome
         self.head       = head
         self.genes      = genes
@@ -265,6 +271,8 @@ class Chromosome(object):
         @param rate: mutation rate per locus
         @return: child chromosome (or self)
         '''
+        # TODO: (#3) on this and other variation ops, it may be better
+        #       not to copy the list until something has actually changed
         chromosome = list(self.chromosome)
 
         # Traverse the chromosome gene by gene
@@ -290,12 +298,18 @@ class Chromosome(object):
 
     def invert(self):
         '''Produces a new chromosome via head inversion'''
+        if self.head < 2: # Head inversion does nothing in this case
+            return self
+
         chromosome = list(self.chromosome)
 
         # Choose a random gene and two points within the head
         gene = random.choice(self._gene_starts)
-        indexes = random.sample(xrange(self.head), 2)
-        start, stop = min(indexes), max(indexes)
+        start, stop = random.sample(xrange(self.head), 2)
+
+        # Order the indexes correctly
+        if start > stop:
+            start, stop = stop, start
 
         # Create the new chromosome
         chromosome[start:stop] = reversed(chromosome[start:stop])
@@ -307,35 +321,11 @@ class Chromosome(object):
 
     def transpose_is(self, length):
         '''Produces a new chromosome via IS transposition'''
-        chromosome = list(self.chromosome)
-
-        # Pick source and target genes
-        source = random.choice(self._gene_starts)
-        target = random.choice(self._gene_starts)
-
-        # Extract a transposition sequence. Truncate if required.
-        start = random.choice(xrange(self._gene_length))
-        end   = start + length
-        end   = self._gene_length if end > self._gene_length else end
-
-        # Offset into target gene: in the head but not the root
-        offset = random.choice(xrange(1, self.head))
-
-        # Insert into the target gene's head
-        chromosome[target:target+self.head] = (
-            chromosome[target:target+offset]    +
-            chromosome[source+start:source+end] +
-            chromosome[target+offset:]
-        )[:self.head]
-
-        if chromosome != self.chromosome:
-            return self._child(chromosome)
-        else:
+        # Since IS does not transpose to the root, it has no purpose
+        # if the head length is less than 2.
+        if self.head < 2:
             return self
 
-
-    def transpose_is(self, length):
-        '''Produces a new chromosome via IS transposition'''
         chromosome = list(self.chromosome)
 
         # Pick source and target genes
@@ -435,8 +425,12 @@ class Chromosome(object):
         @param other: second parent
         @return: child 1, child 2
         '''
-        indexes = random.sample(xrange(len(self)), 2)
-        i1, i2 = min(indexes), max(indexes)
+        if len(self) < 2:
+            return self, other
+
+        i1, i2 = random.sample(xrange(len(self)), 2)
+        if i1 > i2:
+            i1, i2 = i2, i1
         p1, p2 = self.chromosome, other.chromosome
 
         child1 = p1[:i1] + p2[i1:i2] + p1[i2:]

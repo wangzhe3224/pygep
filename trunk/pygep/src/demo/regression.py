@@ -36,7 +36,7 @@ class Regression(Chromosome):
 
     def _fitness(self):
         try:
-            total = sum(self.SELECTION_RANGE - abs(self.evaluate(x)-x.y) 
+            total = sum(self.SELECTION_RANGE - abs(self.evaluate(x)-x.y)
                         for x in DataPoint.SAMPLE)
             return int(max(total, 0.0))
         except:

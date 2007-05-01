@@ -67,8 +67,8 @@ class Population(object):
         Generates a population of some chromsome class
         @param cls:    Chromosome type
         @param size:   population size
-        @param head:   chromosome head length
-        @param genes:  number of genes
+        @param head:   chromosome head length (min=0)
+        @param genes:  number of genes (min=1)
         @param linker: multigenic results linker function
         '''
         self.size   = size
