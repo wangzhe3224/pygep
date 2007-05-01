@@ -1,6 +1,11 @@
 #summary PyGEP Change Log
 #labels Featured
 
-=== 0.1.2.beta ===
- * Issue #4 fixed: using random selection for population means of 0
+=== 0.1.3 beta ===
+ * Issue #5: errors in variation ops for chromosomes with head length 0 or 1
+ * Issue #6: forgot version bump
+ * Issue #7: installation problem on win32
+
+=== 0.1.2 beta ===
+ * Issue #4: using random selection for population means of 0
  * Updated symbolic regression demo
