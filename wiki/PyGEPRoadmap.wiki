@@ -5,15 +5,16 @@
 This is the development road map going toward a 1.0 release.  I'll add tickets to these as they become pertinent.
 
 = Current Status =
-== v0.1 beta ==
- * Ticket #5: Inversion error with head length=1
- * Ticket #7: Windows installation issues
+=== v0.1 ===
+ * Issue #5: Inversion error with head length=1
+ * Issue #7: Windows installation issues
 
 = Future PyGEP Releases =
-== v0.2 ==
- * Ticket #2: Performance enhancement of population cycling and chromosome evaluation
- * Ticket #3: It may be useful to change multigenic chromosomes so that, instead of being one list, they are collections of unigenic chromosomes.  That way they could cache sub-ET evaluation results between chromosomes.
+=== v0.2 ===
+ * Issue #2: Performance enhancement of population cycling and chromosome evaluation
+ * Issue #3: It may be useful to change multigenic chromosomes so that, instead of being one list, they are collections of unigenic chromosomes.  That way they could cache sub-ET evaluation results between chromosomes.
 
-== v0.3 ==
+=== v0.3 ===
  * More demos!
  * Improvements to the function and linker libraries.
+
