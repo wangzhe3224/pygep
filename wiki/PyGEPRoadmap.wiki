@@ -15,6 +15,7 @@ This is the development road map going toward a 1.0 release.  I'll add tickets t
  * Issue #3: It may be useful to change multigenic chromosomes so that, instead of being one list, they are collections of unigenic chromosomes.  That way they could cache sub-ET evaluation results between chromosomes.
 
 === v0.3 ===
+ * Issue #8: random numerical constants (RNCs) via the special '?' terminal
  * More demos!
  * Improvements to the function and linker libraries.
 
