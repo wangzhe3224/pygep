@@ -1,12 +1,12 @@
 #summary Demo of Function Finding in PyGEP
-#labels Featured
+#labels Phase-Implementation
 
 = Introduction =
-Symbolic regression is a common GEP demonstration.  For this one we'll consider the regression.py demo in PyGEP's source repository.
+Symbolic regression is a common GEP demonstration.  For this tutorial we'll consider the regression.py demo in PyGEP's source repository.
 
 = Writing our Gene Expression Program =
 == Step 1: Define the target function ==
-First we define our target function (in this case f(x) = 3x^2^ + 2x + 1) and a class to represent data points.  Note this class has two attributes: `x`, the given value, and `y`, the target value.
+First we define our target function (in this case f(x) = 4x^3^ x^2^ + 2x + 1) and a class to represent data points.  Note instances of this class have two attributes: `x`, the given value, and `y`, the target value.
 {{{
 #!/usr/bin/env python2.5
 from pygep.functions.arithmetic import *
@@ -16,8 +16,9 @@ import random
 
 
 # Data points to test against and target function
-SAMPLE = []
 class DataPoint(object):
+    SAMPLE = []
+    SAMPLE_SIZE = 10
     RANGE_LOW, RANGE_HIGH = -10.0, 10.0
     RANGE_SIZE = RANGE_HIGH - RANGE_LOW
 
@@ -25,46 +26,50 @@ class DataPoint(object):
         self.x = float(x)
 
         # The function we are trying to find
-        # f(x) = 3x^2 + 2x + 1
-        self.y = 3*(x**2) + (2*x) + 1
+        # f(x) = 4*x^3 + 3x^2 + 2x + 1
+        self.y = 4*(x**3) + 3*(x**2) + (2*x) + 1
+
+    @staticmethod
+    def populate():
+        # Creates a random sample of data points
+        DataPoint.SAMPLE = []
+        for _ in xrange(DataPoint.SAMPLE_SIZE):
+            x = DataPoint.RANGE_LOW + (random.random() * DataPoint.RANGE_SIZE)
+            DataPoint.SAMPLE.append(DataPoint(x))
 }}}
 
 == Step 2: Create a chromosome and fitness function ==
 We import functions for our Regression chromosome `pygep.functions.arithmetic` and allow these functions to operate on the `x` attribute of data points and the constants 1 and 2.  The fitness of a given chromosome is its accuracy in determining all data points' `y` values in our sample.  We've found an optimal solution if all sample points are predicted exactly.
 {{{
 # The chromsomes: fitness is accuracy over the sample
-SELECTION_RANGE = 100.0
 class Regression(Chromosome):
+    SELECTION_RANGE = 1000.0
     functions = multiply, add, subtract, divide
     terminals = 'x', 1, 2
 
     def _fitness(self):
         try:
-            total = sum(SELECTION_RANGE - abs(self.evaluate(x)-x.y) 
-                        for x in SAMPLE)
+            total = sum(self.SELECTION_RANGE - abs(self.evaluate(x)-x.y)
+                        for x in DataPoint.SAMPLE)
             return int(max(total, 0.0))
         except:
             return 0
 
     def _solved(self):
-        return self.fitness >= (SELECTION_RANGE * NUM)
+        return self.fitness >= (self.SELECTION_RANGE * len(DataPoint.SAMPLE))
 }}}
 
 == Step 3: Create a population and run it against our sample ==
-Here we create a sample of data points and initialize a Population of Regression chromosomes with size 20, head length 6, 3 genes per chromosome, using the summation linker.  We cycle the population for 50 generations, or until it finds an optimal solution.
+Here we create a sample of data points and initialize a Population of Regression chromosomes with size 20, head length 8, 4 genes per chromosome, using the summation linker.  We cycle the population for 100 generations, or until it finds an optimal solution.
 {{{
 if __name__ == '__main__':
-    # Create a random sample of data points
-    NUM = 10
-    for _ in xrange(NUM):
-        x = DataPoint.RANGE_LOW + (random.random() * DataPoint.RANGE_SIZE)
-        SAMPLE.append(DataPoint(x))
+    DataPoint.populate()
 
     # Search for a solution
-    p = Population(Regression, 20, 6, 3, sum_linker)
+    p = Population(Regression, 20, 8, 4, sum_linker)
     print p
 
-    for _ in xrange(50):
+    for _ in xrange(100):
         if p.best.solved:
             break
         p.cycle()
@@ -79,103 +84,103 @@ if __name__ == '__main__':
 == Step 4: Profit! ==
 And that's about it!  Here's an example run of the above code:
 {{{
-[Generation: 0  |  Best: #9 (481)  |  Mean: 139.7]
-012345678901234567890123456789012345678
----------------------------------------
--2-1/2xx221x1-11/x/22x121x*/2--22x1222x [ 1]: 90
-1/21//222221x*+--//x221122-x*x2-2x12221 [ 2]: 102
-2/x122xx1222x-*-/*+x222xx11/2-121122212 [ 3]: 101
-1xx/x221xx212212x2+x2121x21+*2111x2x1x2 [ 4]: 118
-+1++*/x121111/+2//x1x22xx11++2+/x21xxx1 [ 5]: 127
-++*1xxx112x1xx1-*1x2222221/-1*-/1x1xxx2 [ 6]: 412
-/22+1+x21112x/-2*/2212x212/*xxx12xxx1x1 [ 7]: 111
-+/2--12222x212x+**121xx1212/1xxxx1xx11x [ 8]: 0
-+2+1*xxx11122-**++-22212x2+x-+-*11112x2 [ 9]: 481
-1-*1-+1xx21x2x*1/1x12x2212x/+/112xx2x21 [10]: 91
-+-*/*+xxx1x1x11+*-x2122xxx2*x/-12x2xx21 [11]: 420
-*-/*/-212x122221/+11x1122xx*/+1-2211x11 [12]: 103
-+x*/2122111x2x1*-2-1x12221-2**2+2x2xx22 [13]: 27
-+--x12x1x1x21x+*+1-1122x2x22/-**x122xxx [14]: 111
-/+-x212222212/-1x22x212x12xx+/2111x2112 [15]: 43
-111/+2x2x11221*++1x2212112111+2x121121x [16]: 110
----x1*x21221x*-*2++1121x11x-*--+x222xx2 [17]: 41
-2*x*+-1xx112x-/121+x2xxx211/2x/2x2x1212 [18]: 118
--*/--/211x2x1/2*++*122x1xx*-*12/x1x2x12 [19]: 76
-2*-1+121xxx2xx*/+1+22x212212x*x-1221112 [20]: 111
+[Generation: 0  |  Best: #12 (1810)  |  Mean: 1326.4]
+01234567890123456789012345678901234567890123456789012345678901234567
+--------------------------------------------------------------------
++x12*/+-21221xxx22/*xx1/+2x1x112x1+/+2-/+-1121x1x11/1+2--1+x21x1x2xx [ 1]: 1331
+-x1x/x*1222222211+x22/-1*211x2221x+xx*/*/-xxx1x11x1/+x2/1-+2x1122x2x [ 2]: 1453
+*xx2---*x122211xx-x**-1xx2xx122x1x*/-+*+*1xx122221x+1x/111+112x1xx2x [ 3]: 1466
+*1/++-*/12xxx1211**2+1-/+1xx2x22xx/x+1/xx+21211221x1x-x+//-2112x2x22 [ 4]: 1304
+1xx2/1x21x2x22222+-**+2+*1x1222x1x1-/222+2xx111x12x-*x*/x1*1x122x11x [ 5]: 1223
+221*/12-2xx21x2x1x+12+1122xx2xx122-xx2**/-212x2122xx1/-*/1x1xx122222 [ 6]: 1363
+/x1-22-x2xxxxx1x1//1-///xx22x1xx2x*1+*/*121112xx11x/-+-**x221x2x2xx2 [ 7]: 1258
++*/++12*2222xx12x--1/*//-xx22211x1x-2+x-++12xx12221/x/+-+*-11112122x [ 8]: 1712
+x*/+*//21x11xxx1x12-+1++xx1x212xx2+2x+1-+211121112112-11xx+x12x1x121 [ 9]: 1359
+/2+-1--122x1xx211-1+-1*x*xx11x1211+x2*xx++21x1xxx11x/1**x/12x2121221 [10]: 1442
+/xx2x+*+22x22x212x/2*-+x*x222x11xxx1-x/1+x21111xxxx2-x+---*x1x2x2xxx [11]: 1361
+1-*+1x221xx1x22xx1+111x2*22x1212xx+--2*1+-1x1121212*+*21+2xx11212111 [12]: 1810
+*x2-x-222111xx112/+x1-x1*x21x2xx22/x2+2*1xx1x2xxx22-1+--*--1x1x11x12 [13]: 1441
+/-/*x-*/2x2x22x2x*/+x-x/x2121xxx2x+/1-1+1*1122x2111+x21**x111x112x21 [14]: 1269
+*+/22+1/x111x1221+2x1-1+/211x2x22x*2*11+x-2221122xx*2111x/222x11x2xx [15]: 1501
+/x*x+/21x112x1121//*++2+1212x2221x*1--x/+/121xxx2x21+1/211*12x2x21xx [16]: 1211
+1+*2+11*11212x112x1*/x2--xxx1x2x12/*2+2**x2122122211-1/1+xxx11121121 [17]: 1410
+-/-*xx*x12xx12221x2x11-//11xx2212x1*-2*2/xxx21112211*+1//++1x11x2x22 [18]: 1361
+2x-+--1/x1222222x+2/2++-2x11x2x11x**/x11x2212x121xx11xxx-22x2xxx2222 [19]: 1253
+-2*+2+1x2xx11xx112-2-**x+21xx21x2x+2+***x22121x211x*/x1/2+12x2x21x12 [20]: 0
 
-[Generation: 1  |  Best: #9 (481)  |  Mean: 230.2]
-012345678901234567890123456789012345678
----------------------------------------
-+2+1*xxx11122-**++-22212x2+x-+-*11112x2 [ 9]: 481
--2-1/22xx21x1-11/x/222121x*/2--21x1222x [21]: 104
-12/21/222221x*+--//x221122-x*x2-2x12221 [22]: 102
-2/x122xx1222x-*-/*+x222xx11/2-121122212 [ 3]: 101
-1xx/x221xx2x2212x2+x2121x21+*-111x2x1x2 [23]: 118
-1xx/x221xx222212x2+x2121x21+*2111x2x1x2 [24]: 118
-1/xxx221xx212212x2+x2111x21+*2111x2xx2x [42]: 118
-1/x-x221xx212212x2+x2121x11//2111x2x1x2 [27]: 118
-+1++*/x121111/+-//x1x22xx11++2+/x21x2x1 [28]: 131
-++*1xxx112x1xx1-*1x2212221/-1*-/1x1xxx1 [29]: 412
-++*1xxx112x1xx1-*1x2222221/-1*-/2x1xxx2 [30]: 420
-++*1xxx112x1x*-1*-/1x1xxx2x1-2*12222221 [33]: 412
--+*1x+x112x1xx1-/1x2222221/-1*-/1x1x2x2 [34]: 102
-+2+/*xx211222-**++-22212x2+x-+-211112x2 [35]: 213
-+2+1*xxx11122-**++-22212x2+x-+-*11112x2 [ 9]: 481
-+-*/*+xxx2x1x-1+*-x21222xx2*x/-12x2x1x2 [41]: 408
-+-*/*2xxx1x1x11+*-x2122xxx2*x/-12x2xx21 [37]: 119
-+-*/*+xxx1x1x11+*-x2122xxx2*x/-12x2xx21 [11]: 420
--*/+/-212x122221/+11x1122xx*++1-1211x11 [39]: 99
-2*-1+121xxx2x2*/+1+22x212212x*x-1221112 [40]: 126
+[Generation: 1  |  Best: #12 (1810)  |  Mean: 1345.0]
+01234567890123456789012345678901234567890123456789012345678901234567
+--------------------------------------------------------------------
+1-*+1x221xx1x22xx1+111x2*22x1212xx+--2*1+-1x1121212*+*21+2xx11212111 [12]: 1810
++x12*/+-21211xxx22/*xx1/+2x1x112x1+*+2-/+-1x1121212*+*21-1+x21x1x2xx [40]: 1192
+*xx2---*x122211xx-x**-1xx2xx122x1x*/-+*+*1xx122221x+1x/111+112x1xx2x [ 3]: 1466
+*1/++-*/12xxx1x11**2+1-/+1xx2x22xx/x+1/xx+21211221x1x-x+//-2112x2x22 [22]: 1168
+-+x2/1x21x2x22222+-**+2+*1x1222x1x1-/222+1xx111x12x-*x*1x1*1x12xx11x [23]: 1252
+1xx2/1x21x2x22222+-**+2+*1x1222x1x1-/222+2xx111x12x-*x*/x1*1x122x11x [ 5]: 1223
+1xx2/1x21x2x22222+-**+2+x1x1222x1x1-/222+2xx111x12x1*x*/x1*1x122x11x [24]: 1245
+221*/12-2xx21x2x1x+12+1122xx2xx1x2-xx2**/-212x2122x+1/-*/1x11x122222 [25]: 1116
+221*/12-2xx21x2x1x+12+1122xx2xx122-xx2**/-21222122xx1/-*/1x1xx122222 [26]: 1363
+x*/+*//21x1xxxx1x12-+1++xx1x212xx2+2x+1-+211121112112211xx+x12x1x121 [27]: 1359
+/2+-1--122x1xx211-1+-1*x*xx11x1211+x2*xx++21x1xxx11x/1**x/12x2121221 [10]: 1442
+x/2*-+x*x122x11xx/xx2x+*+22x22x212x1-x/1+x21111xxxx-2-x+---x1x2x2xxx [30]: 1150
+1-*+1x221xx1x2xxx1+111x2*22x1212xx+--2*1+-1121x1x11/1+2-+2xx11212111 [39]: 1309
+*+/22+1/x111x1121+2x1-1+/211x2x22x*2*11+x-2221122xx*2111x/222x11x2xx [32]: 1501
+*+/22+1/x111x1221+2x1-1+/211x2x22x*2*11+x-2221122xx*2111x/2x2x11x2xx [33]: 1501
+1+*2+11*11211x112x1*/x2--xxx1x2x12/-2+2**x2111122211-1/1+xxx11121121 [34]: 1364
+1+11+2**11212x112x1*/x2-+xxx1x2x12/*2+2**x2122122211-1/1+xxx11121121 [36]: 1410
+-/-*xx*x12xx12221x2x11-//11xx2212x1*-2*2/xxx21112211*+1//++1x11x2x22 [18]: 1361
+-/-*xx*x12xx12221x2x11-//11xx2212x1*-2*21/xx21112211*+1//++1x11x2x22 [37]: 1361
+xx-+--+/x1222222x+2/2++-2x11x2211x**/x11x2112x121xx11xxx-22x2xxx2222 [38]: 1308
 
 ... snip ...
 
-[Generation: 10  |  Best: #220 (760)  |  Mean: 508.2]
-012345678901234567890123456789012345678
----------------------------------------
-*2+1*xxx1x122-**++/2221212+*-*+-11x2221 [199]: 760
-*2+1**xx12122-**++/2221212+*-*+-11x2221 [220]: 760
-*2+11*xx12122-**++/2221212+*-*+-11x2221 [221]: 202
-*1+1*xxx12122-**++/22x1212+*-*+-11x2221 [222]: 429
-*2+1*xxx12122-**++/22x1212/*-*+-11x2221 [223]: 0
-*2+1*xxx12x22x**-+/2221222+*-*+-11x2221 [224]: 697
--**+2+22212x2+++--+1111221*2+1*+xx1x122 [225]: 739
--*12-+22112x2+++--+1111221*2+-+2xx12122 [228]: 166
--**+2+22212x2*2+1*xxxx2122*2+1*+xx12122 [239]: 647
-+2+-+*12112x1-*1x+/22212x2+xx+**xx1x112 [203]: 127
-*2+1*+xx1x122-**++/22211x2+2--/xx2111x1 [230]: 740
-*2+2*xxx12122+2-*+-11x2221x**++*2x21212 [209]: 716
-*2+2*xxx12122x**++/2221212++2-*+11x2121 [232]: 741
-*2+2*xxx12122x**++/2221212+2-*/211x2x21 [233]: 734
--1+**+2221222*2+1*xxx12122+2-*+-11x2221 [234]: 631
-/2x**+2221222*2+1*xxx12122+2-*+-11x2221 [214]: 704
-/2x**+2221222+/+--+111122122-*+-11x2221 [238]: 136
-*2+1*x1x22122+2-*+-11x2221-*2+-/2221212 [236]: 93
-*2*1*xxx22122+2-*+-11x2221-**+-/2221212 [237]: 661
-+2+1*xxx11122-*2++1222x2x2+--*-*1x212x1 [219]: 481
+[Generation: 54  |  Best: #1197 (9990)  |  Mean: 6952.9]
+01234567890123456789012345678901234567890123456789012345678901234567
+--------------------------------------------------------------------
+1+-++2/2x21212x1x*--*-+1x22xx212xx***x+xx22xx1x21xx++-x+-*x2x1x2112x [1197]: 9990
+1+-++2/2x21212x1x*--*-+1x22xx212xx***x+xx22xx1x21xx++-x--*x2x1x2112x [1270]: 9950
+1+-++2/2x21212x1x*--*-+1x22xx212x2***x+xx22xx1x21xx++-x+-*22x1xx11xx [1271]: 9678
+1+x++2/2x21212x1x*--*-+1x2xxx212xx**/x+xx22xx1x21xx++-x+-*x2x1x21122 [1272]: 1571
++/2++-+2x21212x1x***++-x+211x2122x***x+xx22xx1x21xx2--*-+1x22xx212xx [1250]: 7609
+2/2++-+2x21x12x1x*1xx--*-22xx212xx***x+xx22xx1x21xx-+-+x+1x22xx212xx [1273]: 9036
+*2/-++-+x21212x1x***++-x+211x112xx*x**+xx22xx1x21xx*--*-x1x22xx212xx [1290]: 6688
+1+-++2/2x21212x1x*--*-+1x22xx2122x***x*-*x2xx1x21xx++-x+-*xx11x2112x [1291]: 1295
+1+-++2/2x21212x1x*--*-+1x22xx112xx***x*xx222x1xx1xx++-x+-*x211x2112x [1277]: 9791
+1+-++2/2x21112x1x*--*-+1x22xx112xx***x*xx22xx1x21xx+/-x+-*x211x21122 [1278]: 9691
+**2+-++2221212x1x***x+xx222x1x21xx*--*-+1x22xx112xx++-x+-*x2x1x2112x [1280]: 9846
+2+-++2/2x21212x1x***1x+xx22x1x21xx*--*-+1x22xx112xx++-x+-*x2x1x2112x [1281]: 3267
+2+-++2/2x21212x1x***x+xx222x1x21xx*--*-+1x22xx112xx++-x+-*x2x1x2112x [1255]: 9842
+2+-++2/2x21212x1x***x+xx222x1x21xx*--*-22+22xx112xx++-x+-*x2x1x2112x [1282]: 9039
+**2++-+2xxx2x2x1x---+x*2-2x1x21x22*2***x+x2xx1x21xx*+2x--*-22xx212xx [1283]: 1017
+**2++-+1x2x2x2x1x---+x*2-2x1x21x22***x+xx22xx1x21xx*+2x--*-22xx212xx [1284]: 9013
+**2/+-+2x222x2x1x*2*++-x+211x2122x+-*/*x2x2x21x21xx*--*-*x12x2121x22 [1286]: 1307
+--x+x*x12x2121x22*1x21xx-22xx212xx***x+xx22xx1x21xx**2++-+2x222x2x1x [1287]: 9665
+**2++-+2x222x2x1x*1xx--*-22xx2121x***x+xx22xx1x21xx---+x*x12x2121x2x [1288]: 9694
+*/2++-+2x21212x1x-1-/*x+122xx212xx***x+2x22xx1x212x+x-x+-*x2x1x2122x [1289]: 1069
 
-[Generation: 11  |  Best: #245 (1000)  |  Mean: 561.4]
-012345678901234567890123456789012345678
----------------------------------------
-*2+1**xx12122-**++/2221212+*-*+-11x2221 [220]: 760
-*2/1*xx2xx122-**++/2221212+*-*+-11x2221 [240]: 175
-**+1*xxx1x1x1-**++/2221212+*-*+-11x1221 [241]: 755
-*2+1*xxx2x122-**/+/2221212+*-*+-11xx221 [242]: 960
-**+1**xx12122-**++/2221212+*-*+-11x2221 [243]: 463
-x1+1*xxx22122-**++/22x1212+*-*+-11x2221 [244]: 124
-*2+1*xxx12x22x**-+/2221222+*-*+-11x2221 [224]: 697
-*2+1*xxx12x22x**-+/2221222+*-x+-11x222x [245]: 1000
-*2+1*+xx1x122-*-++/22211x2+2--/xx2111x1 [246]: 747
-*2+1x+xx1x122-*2++1222x2xx+--*2*12211x1 [261]: 198
-*2+2*xxx12122+2-*+-11x2221x**++*2211212 [248]: 716
-*2+2*xxxx2222x**++/2221212++2-*+11x2121 [249]: 741
-*2+2*xxx12122x**++/2x21212++2-*+1xx2121 [250]: 924
-*2+2*xxx12122x-*++/22x1212++2-*+11x2121 [251]: 741
-*x+1-*2221222*2+1*xxx12122+2-*+-11x2221 [253]: 714
--1+**+2221212*2+1*xxx121x2+2-*+-11x2221 [254]: 631
-/2x**+2221222*221*xxx12122+-1+2111x2221 [256]: 128
-/2x**/2221222*2++1*xx12122+2-*+-11x2221 [258]: 107
-+-+1*xxx11122-**++/22211x2+2--/xx2212xx [260]: 166
-+2+1*xxx11122-*2++1222x2x2+--*-*1x212x1 [219]: 481
+[Generation: 55  |  Best: #1310 (10000)  |  Mean: 7608.2]
+01234567890123456789012345678901234567890123456789012345678901234567
+--------------------------------------------------------------------
+1+-++2/2x21212x1x*--*-+1x22xx212xx***x+xx22xx1x21xx++-x+-*x2x1x2112x [1197]: 9990
+1+-++2/2x21212x1x*--*-+1x22xx212xx***x+xx22xx1x21xx++-x+-*x2x1x2122x [1292]: 9990
+122x/2++x21212x1x*--*-+1x22xx212xx***x+xx22xx1x21xxx+-x+-*x2x1x2112x [1317]: 9980
+1+-++2/2x21212x1x*--*-+1x22xx212xx***x+xx22xx1x21xx++-x+-*x2x1x2112x [1197]: 9990
+*--*-+1x22xx212xx1+-++2/2x21212x1x***x+xx22xx1x2xxx++-x--*x2x1x2112x [1316]: 9950
+1+-++2/2x21212x1x++-x+-*22x1xx11xx***x+xx22xx1x212x*--*-+1x22xx212x2 [1298]: 9678
+1+x++2/2x21212x1x*--*-+1x2xxx212xx**+x+xx22xx1x21x1++-x+-*x2x1x21122 [1299]: 1181
++/2++-+2x21212x1x***++-x+211x2122x***x+xx22xx1x21xx*-+2--*-22xx212xx [1300]: 7545
+1+-++2/2x21222x1x***--*-+12xx112xx***xx*xx22x1xx1xx++-x+-*x211x2112x [1303]: 0
+1+2++2/2x21212x1x*2-*-+1x22xx112xx**/x*xx222x1xx1xx++-x+-*x211x2112x [1314]: 1448
+1+-++2/2x21212x1x*--*-+1x22xx112xx***x*xx212x1xx1xx++-x+-*x211x2112x [1315]: 5439
+1+-++2/2xxx112x1x*--*-+1x22x1112xx***x*xx22xx1121xx+/-x++*x211x21122 [1306]: 9030
+**2+-++22212x2x1x***x+xx222x1x21xx*--*-+1x22xx112xx+++-x+-*2x1x2112x [1308]: 9945
+**2+-++2221212x1x***x+xx222x1x21xx*--*-+1x22xx1121x++-x+-*x2x1x2112x [1309]: 9846
+2+-++*/2x21212x1x***x+xx222x1x21xx*--*-+/x22xx112xx++-x+-*x2x1x2112x [1310]: 10000
+2+-++2/2x21212x11+***x+xx22x1x11xx*--*-+1x22xx112xx++-x+x*x2x1x2112x [1312]: 1219
+2+-++2/1x21212x1x***x+xx222x1x21xx*--*-+1x22x1112xx++-x+-*x2x1x2112x [1313]: 9013
+2+-++2/2x21212x1x***x+xx222x1x21xx*--*-+1x22xx112xx++-x+-*x2x1x2112x [1255]: 9842
+2+-++2/2x21212x1x***x+xx222x1x21xx*--*-22+22xx112xx++-x+-*x2x1x2112x [1282]: 9039
+2+-++2/2x21212x1x***x+xx222x1x21xx*--*-22+22xx112xx++-x+-*x2x1x2112x [1282]: 9039
 
-SOLVED: *2+1*xxx12x22x**-+/2221222+*-x+-11x222x
+SOLVED: 2+-++*/2x21212x1x***x+xx222x1x21xx*--*-+/x22xx112xx++-x+-*x2x1x2112x
 }}}
