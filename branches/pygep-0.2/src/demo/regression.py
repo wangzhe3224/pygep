@@ -16,7 +16,7 @@ class DataPoint(object):
         self.x = float(x)
 
         # The function we are trying to find
-        # f(x) = 4*(x**4) + 3x^2 + 2x + 1
+        # f(x) = 4*x^3 + 3x^2 + 2x + 1
         self.y = 4*(x**3) + 3*(x**2) + (2*x) + 1
 
     @staticmethod
@@ -39,7 +39,7 @@ class Regression(Chromosome):
             total = sum(self.SELECTION_RANGE - abs(self.evaluate(x)-x.y)
                         for x in DataPoint.SAMPLE)
             return int(max(total, 0.0))
-        except:
+        except ZeroDivisionError:
             return 0
 
     def _solved(self):

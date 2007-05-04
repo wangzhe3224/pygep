@@ -192,8 +192,8 @@ class Chromosome(object):
                 except AttributeError:
                     name = str(gene)
 
-            # Truncate any name longer than 1 char
-            s += name[:1] or '?'
+            # If the name is not one char, surround it with { }
+            s += name if len(name) == 1 else '{%s}' % name
 
         return s
 
