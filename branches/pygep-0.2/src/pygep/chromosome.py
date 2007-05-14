@@ -15,8 +15,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from itertools import izip
+from pygep.functions.linkers import default_linker
+from pygep.gene import KarvaGene
 from pygep.util import cache
 import functools, random
+
 
 
 def symbol(s):
@@ -90,6 +93,8 @@ class Chromosome(object):
     '''
     __metaclass__ = MetaChromosome
     __next_id = 1
+    gene_type = KarvaGene
+
 
     functions = ()
     terminals = ()
@@ -97,26 +102,27 @@ class Chromosome(object):
 
 
     @classmethod
-    def generate(cls, head, genes=1, linker=lambda x: x):
+    def generate(cls, head, genes=1, linker=default_linker):
         '''
         Returns a generator of random GEP chromosomes
-        @param genes:  number of genes (min=1)
         @param head:   head length (min=0)
+        @param genes:  number of genes (min=1)
         @param linker: linking function
         '''
         tail = head * (cls.arity - 1) + 1
 
         while True:
-            chromosome = []
-            for _ in xrange(genes):
-                chromosome.extend(
+            g = [None] * genes
+            for i in xrange(genes):
+                g[i] = cls.gene_type(
                     [random.choice(cls.symbols)   for _ in xrange(head)] + \
-                    [random.choice(cls.terminals) for _ in xrange(tail)]
+                    [random.choice(cls.terminals) for _ in xrange(tail)], head
                 )
-            yield cls(chromosome, head, genes, linker)
+
+            yield cls(g, head, linker)
 
 
-    def __init__(self, chromosome, head, genes, linker):
+    def __init__(self, genes, head, linker):
         '''
         Instantiates a chromsome instance and analyzes it for evaluation.
         Sets the self.coding tuple to the last genes in the coding regions
@@ -125,83 +131,32 @@ class Chromosome(object):
         much more common to create them via calls to the static method
         Chromosome.generate(...).
 
-        @param chromosome: combined list of all genes
-        @param head:       length (not index) of the gene heads (min=0)
-        @param genes:      number of genes in the chromosome (min=1)
-        @param linker:     linker function for gene evaluation
+        @param genes:  number of genes in the chromosome (min=1)
+        @param head:   length (not index) of the gene heads (min=0)
+        @param linker: linker function for gene evaluation
         '''
         # Must have at least one gene and a head length of 0
         if head < 0:
             raise ValueError('Head length must be at least 0')
-        if genes < 1:
+        if not genes:
             raise ValueError('Must have at least 1 gene')
 
-        self.chromosome = chromosome
-        self.head       = head
-        self.genes      = genes
-        self.linker     = linker
-
-        # Useful information: the length of each gene
-        self._gene_length = len(self) / self.genes
+        self.genes  = genes
+        self.head   = head
+        self.linker = linker
 
         # Unique number of the organism
         self.__id = type(self).__next_id
         type(self).__next_id += 1
 
-        # Determine coding indexes for each gene:
-        self.coding = ()
-        for start in self._gene_starts:
-            # How to find the length of a single coding region:
-            #
-            # Start at the first gene and determine how many args it
-            # requires. Then move forward that many args and sum their
-            # required args. Continue this until there are no more
-            # required args. The resulting index will be one gene past
-            # the coding region for the current gene
-            index, args = start, 1
-            while args:
-                next_args = 0
-                for _ in xrange(args):
-                    if callable(chromosome[index]):
-                        next_args += chromosome[index].func_code.co_argcount
-                    index += 1
-
-                args = next_args
-
-            self.coding += index - 1,
-
-        # This attribute is a prepopulated list to make evaluating
-        # the chromosome against data instances more efficient.
-        self._eval = list(chromosome)
-
 
     def __len__(self):
-        return len(self.chromosome)
+        return sum(len(g) for g in self.genes)
 
 
     @cache
     def __repr__(self):
-        s = ''
-        for gene in self.chromosome:
-            # Differentiate between functions and terminals
-            try:
-                name = gene.symbol
-            except AttributeError:
-                try:
-                    name = gene.__name__
-                except AttributeError:
-                    name = str(gene)
-
-            # If the name is not one char, surround it with { }
-            s += name if len(name) == 1 else '{%s}' % name
-
-        return s
-
-
-    _gene_starts = property(
-        lambda self: xrange(0, len(self), self._gene_length),
-        doc='Indexes where each individual gene commences'
-    )
+        return ''.join(repr(g) for g in self.genes)
 
 
     def _child(self, chromosome):
@@ -213,7 +168,7 @@ class Chromosome(object):
     id = property(lambda self: self.__id, doc='Organism #')
 
 
-    def evaluate(self, obj):
+    def __call__(self, obj):
         '''
         Evaluates a given GEP chromosome against some instance.  The
         terminals in the chromosome are assumed to be attributes on
@@ -222,33 +177,7 @@ class Chromosome(object):
         @param obj: an object instance with terminal attributes set
         @return:    result of evaluating the chromosome
         '''
-        # Start by clearing out our eval list
-        for i, gene in enumerate(self.chromosome):
-            self._eval[i] = None
-            if callable(gene):
-                self._eval[i] = None
-            elif not isinstance(gene, str):
-                # could be a number
-                self._eval[i] = gene
-            else:
-                self._eval[i] = getattr(obj, gene)
-
-
-        # Evaluate each chromosome gene against obj in reverse
-        for coding, start in izip(self.coding, self._gene_starts):
-            index = coding + 1
-            for i in reversed(xrange(start, index)):
-                gene = self.chromosome[i]
-
-                if callable(gene):
-                    num  = gene.func_code.co_argcount
-                    args = self._eval[index-num:index]
-
-                    # Replace the operation in self._eval with its return val
-                    self._eval[i] = gene(*args)
-                    index -= num
-
-        return self.linker(*self._eval[0:len(self):self._gene_length])
+        return self.linker(*(g(obj) for g in self.genes))
 
 
     def _fitness(self):

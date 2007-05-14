@@ -54,7 +54,7 @@ class KarvaGene(object):
 
     
     @memoize
-    def evaluate(self, obj):
+    def __call__(self, obj):
         '''
         Evaluates a Karva gene against some instance.  The string terminals in 
         the gene are assumed to be attributes on the object instance.  Numeric
@@ -93,3 +93,25 @@ class KarvaGene(object):
 
         # Expression results will always be stored in the first index
         return evaluation[0]
+
+
+    def __repr__(self):
+        s = ''
+        for allele in self.alleles:
+            # Differentiate between functions and terminals
+            try:
+                name = allele.symbol
+            except AttributeError:
+                try:
+                    name = allele.__name__
+                except AttributeError:
+                    name = str(allele)
+
+            # If the name is not one char, surround it with { }
+            s += name if len(name) == 1 else '{%s}' % name
+
+        return s
+
+    
+    def __len__(self):
+        return len(self.alleles)

@@ -16,6 +16,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 from itertools import izip
 from operator import attrgetter
+from pygep.functions.linkers import default_linker
 from pygep.util import stats
 import random, string
 
@@ -62,7 +63,7 @@ class Population(object):
     crossover_gene_rate      = 0.1
 
 
-    def __init__(self, cls, size, head, genes=1, linker=lambda x: x):
+    def __init__(self, cls, size, head, genes=1, linker=default_linker):
         '''
         Generates a population of some chromsome class
         @param cls:    Chromosome type
