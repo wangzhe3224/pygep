@@ -94,7 +94,7 @@ if __name__ == '__main__':
     p = Population(TumorEvaluator, 50, 8, 4, sum_linker)
     print p
 
-    for _ in xrange(50):
+    for _ in xrange(5):
         if p.best.solved:
             break
         p.cycle()

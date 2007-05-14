@@ -1,6 +1,5 @@
 # PyGEP: Gene Expression Programming for Python
 # Copyright (C) 2007  Ryan J. O'Neil
-# http://code.google.com/p/pygep/
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,8 +15,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from pygep.chromosome import Chromosome
-from pygep.population import Population
+from pygep.gene.karva import KarvaGene
 
-__version__ = '0.2.0'
-__all__ = 'Chromosome', 'Population'
+__all__ = 'KarvaGene',

@@ -42,3 +42,34 @@ def cache(func):
 
     return wrapper
 
+
+def memoize(func):
+    '''
+    Decorator for memoizing a function based on its arguments.  Results are
+    stored in self._{method}_memo where {method} is the name of the method.
+    Note that the args must be hashable, thus lists can't be memoized.
+    
+        @memoize
+        def _compute_something(self, arg1, arg2):
+            ...
+            return 'something'
+    '''
+    memo_name = '_%s_memo' % func.func_name
+    
+    @functools.wraps(func)
+    def wrapper(self, *args):
+        try:
+            memo = getattr(self, memo_name)
+        except AttributeError:
+            # Haven't memoized anything yet
+            memo = {}
+            setattr(self, memo_name, memo)
+        
+        try:
+            return memo[args]
+        except KeyError:
+            # Haven't seen these args yet
+            memo[args] = results = func(self, *args)
+            return results
+    
+    return wrapper
