@@ -76,7 +76,7 @@ class KarvaGene(object):
             else:
                 return getattr(obj, allele)
         
-        eval = [_value(a) for a in self.alleles]
+        evaluation = [_value(a) for a in self.alleles]
 
         # Evaluate the gene against obj in reverse
         index = self.coding + 1
@@ -85,11 +85,11 @@ class KarvaGene(object):
 
             if callable(allele):
                 num  = allele.func_code.co_argcount
-                args = eval[index-num:index]
+                args = evaluation[index-num:index]
 
-                # Replace the operation in self._eval with its return val
-                eval[i] = allele(*args)
+                # Replace the operation in eval with its return val
+                evaluation[i] = allele(*args)
                 index -= num
 
         # Expression results will always be stored in the first index
-        return eval[0]
+        return evaluation[0]
