@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+from copy import copy
 from pygep.util import memoize
 
 
@@ -33,24 +34,7 @@ class KarvaGene(object):
         self.alleles = alleles
         self.head    = head
         
-        # How to find the length of a single coding region:
-        #
-        # Start at the first gene and determine how many args it
-        # requires. Then move forward that many args and sum their
-        # required args. Continue this until there are no more
-        # required args. The resulting index will be one gene past
-        # the coding region for the current gene
-        index, args = 0, 1
-        while args:
-            next_args = 0
-            for _ in xrange(args):
-                if callable(alleles[index]):
-                    next_args += alleles[index].func_code.co_argcount
-                index += 1
-
-            args = next_args
-
-        self.coding = index - 1
+        self._find_coding()
 
     
     @memoize
@@ -115,3 +99,85 @@ class KarvaGene(object):
     
     def __len__(self):
         return len(self.alleles)
+    
+    
+    def __iter__(self):
+        return iter(self.alleles)
+    
+    
+    def __getitem__(self, i):
+        return self.alleles[i]
+    
+    def __getslice__(self, i, j):
+        return self.alleles[i:j]
+    
+    
+    def _find_coding(self):
+        '''Assigns the last coding index to self.coding'''
+        # How to find the length of a single coding region:
+        #
+        # Start at the first gene and determine how many args it
+        # requires. Then move forward that many args and sum their
+        # required args. Continue this until there are no more
+        # required args. The resulting index will be one gene past
+        # the coding region for the current gene
+        index, args = 0, 1
+        while args:
+            next_args = 0
+            for _ in xrange(args):
+                if callable(self.alleles[index]):
+                    next_args += self.alleles[index].func_code.co_argcount
+                index += 1
+
+            args = next_args
+
+        self.coding = index - 1
+    
+    
+    def derive(self, changes):
+        '''
+        Derives a gene from self.  If the coding region remains unchanged,
+        then the new gene keep the memoized evaluations of its parent. For 
+        instance, replacing allele 0 with 'x' and allele 3 with a function
+        add via point mutation would look like:
+                        
+            gene.derive([(0, ['x']), (3, [add]))
+        
+        Whereas replacing a block of alleles in crossover would like like:
+        
+            gene.derive([(5, [add, 'x', 'y'])])
+
+        @param changes: sequence of (index, alleles) tuples
+        @return: new KarvaGene
+        '''
+        new  = None # new gene
+        same = True # whether or not the coding region is the same
+        for index, alleles in changes:
+            l = len(alleles)
+            
+            if self[index:index+l] != alleles:
+                # Copy the alleles on first change
+                if not new:
+                    new = self[:index] + alleles + self[index+l:]
+                else:
+                    new[index:index+l] = alleles
+                
+                # Does this change the coding region?
+                if same and index <= self.coding:
+                    same = False
+            
+        if not new: # Nothing changed!
+            return self
+        
+        # Create the new gene
+        gene = copy(self)
+        gene.alleles = new
+        
+        if not same: # Recalculate coding region & kill memoized results
+            gene._find_coding()
+            try:
+                delattr(gene, self.__call__.memo)
+            except AttributeError:
+                pass
+            
+        return gene

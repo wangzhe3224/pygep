@@ -47,14 +47,15 @@ def memoize(func):
     '''
     Decorator for memoizing a function based on its arguments.  Results are
     stored in self._{method}_memo where {method} is the name of the method.
-    Note that the args must be hashable, thus lists can't be memoized.
+    Note that the args must be hashable, thus lists can't be memoized.  The
+    name of the memoized attribute is stored on the method itself as func.memo.
     
         @memoize
         def _compute_something(self, arg1, arg2):
             ...
             return 'something'
     '''
-    memo_name = '_%s_memo' % func.func_name
+    func.memo = memo_name = '_%s_memo' % func.func_name
     
     @functools.wraps(func)
     def wrapper(self, *args):

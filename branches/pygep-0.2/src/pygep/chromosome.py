@@ -159,9 +159,9 @@ class Chromosome(object):
         return ''.join(repr(g) for g in self.genes)
 
 
-    def _child(self, chromosome):
+    def _child(self, genes):
         '''Returns a child chromosome of self'''
-        return type(self)(chromosome, self.head, self.genes, self.linker)
+        return type(self)(genes, self.head, self.linker)
 
 
     # Unique ID of the organism
@@ -200,29 +200,35 @@ class Chromosome(object):
         @param rate: mutation rate per locus
         @return: child chromosome (or self)
         '''
-        # TODO: (#3) on this and other variation ops, it may be better
-        #       not to copy the list until something has actually changed
-        chromosome = list(self.chromosome)
-
+        genes = list(self.genes)
+        
         # Traverse the chromosome gene by gene
-        for start in self._gene_starts:
+        for gene_idx, gene in enumerate(self.genes):
             # Then locus by locus
-            for i in xrange(self._gene_length):
+            replacements = []
+            for i, allele in enumerate(gene):
                 # Do we mutate this locus?
                 if random.random() < rate:
                     # Mutation within the tail can only use terminals
                     if i >= self.head:
-                        gene = random.choice(self.terminals)
+                        new_allele = random.choice(self.terminals)
                     else:
-                        gene = random.choice(self.symbols)
+                        new_allele = random.choice(self.symbols)
+                    
+                    # Only use this if the mutation actually did something
+                    if new_allele != allele:
+                        replacements.append((i, [new_allele]))
 
-                    chromosome[start+i] = gene
 
-        # Only create a new chromosome if it is actually different
-        if chromosome != self.chromosome:
-            return self._child(chromosome)
-        else:
-            return self
+            # If we have actual replacements to make, do them
+            if replacements:
+                genes[gene_idx] = gene.derive(replacements)
+            
+        # Create a child of this chromosome
+        if genes != self.genes:
+            return self._child(genes)
+        
+        return self
 
 
     def invert(self):
