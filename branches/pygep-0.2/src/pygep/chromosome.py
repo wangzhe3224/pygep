@@ -160,8 +160,10 @@ class Chromosome(object):
 
 
     def _child(self, genes):
-        '''Returns a child chromosome of self'''
-        return type(self)(genes, self.head, self.linker)
+        '''Returns a child chromosome of self (or self if they are the same)'''
+        if genes != self.genes:
+            return type(self)(genes, self.head, self.linker)
+        return self
 
 
     # Unique ID of the organism
@@ -225,10 +227,7 @@ class Chromosome(object):
                 genes[gene_idx] = gene.derive(replacements)
             
         # Create a child of this chromosome
-        if genes != self.genes:
-            return self._child(genes)
-        
-        return self
+        return self._child(genes)
 
 
     def invert(self):
@@ -249,11 +248,8 @@ class Chromosome(object):
         # Create the new chromosome
         replacement = list(reversed(genes[i][start:stop]))
         genes[i] = genes[i].derive([(start, replacement)])
-        
-        if genes != self.genes:
-            return self._child(genes)
-        
-        return self
+        return self._child(genes)
+
 
 
     def transpose_is(self, length):
@@ -280,11 +276,7 @@ class Chromosome(object):
         replacement = source[start:end] + \
                       genes[target][offset:self.head-end+start]
         genes[target] = genes[target].derive([(offset, replacement)])
-
-        if genes != self.genes:
-            return self._child(genes)
-
-        return self
+        return self._child(genes)
 
 
     def transpose_ris(self, length):
@@ -309,11 +301,7 @@ class Chromosome(object):
         # Insert into the target gene's head at position 0
         replacement   = source[start:end] + genes[target][:self.head+start-end]
         genes[target] = genes[target].derive([(0, replacement)])
-
-        if genes != self.genes:
-            return self._child(genes)
-
-        return self
+        return self._child(genes)
 
 
     def transpose_gene(self):
@@ -326,10 +314,7 @@ class Chromosome(object):
 
         # Switch these genes
         genes[s], genes[t] = genes[t], genes[s]
-        if genes != self.genes:
-            return self._child(genes)
-
-        return self
+        return self._child(genes)
 
 
     def crossover_one_point(self, other):
@@ -338,10 +323,17 @@ class Chromosome(object):
         @param other: second parent
         @return: child 1, child 2
         '''
-        index = random.randint(0, len(self)-1)
-        child1 = self.chromosome[:index] + other.chromosome[index:]
-        child2 = other.chromosome[:index] + self.chromosome[index:]
-        return self._child(child1), self._child(child2)
+        g1, g2 = list(self.genes), list(other.genes)
+        
+        # Pick a gene and index to crossover at
+        gene  = random.choice(xrange(len(g1)))
+        index = random.choice(xrange(len(g1[gene])))
+        
+        # Construct new child genes
+        c1 = g1[gene].derive([(index, g2[gene][index:])])
+        c2 = g2[gene].derive([(index, g1[gene][index:])])
+        g1[gene], g2[gene] = c1, c2
+        return self._child(g1), other._child(g2)
 
 
     def crossover_two_point(self, other):
@@ -353,14 +345,34 @@ class Chromosome(object):
         if len(self) < 2:
             return self, other
 
+        g1, g2 = list(self.genes), list(other.genes)
+
+        # Choose start and stop loci
         i1, i2 = random.sample(xrange(len(self)), 2)
         if i1 > i2:
             i1, i2 = i2, i1
-        p1, p2 = self.chromosome, other.chromosome
+        
+        # Convert these to gene and allele numbers
+        gene_length = len(self.genes[0])
+        i1, a1 = divmod(i1, gene_length)
+        i2, a2 = divmod(i2, gene_length)
 
-        child1 = p1[:i1] + p2[i1:i2] + p1[i2:]
-        child2 = p2[:i1] + p1[i1:i2] + p2[i2:]
-        return self._child(child1), self._child(child2)
+        # Switch genes in between the modified genes
+        if i2 - i1 > 1:
+            start = i1 + 1
+            g1[start:i2], g2[start:i2] = g2[start:i2], g1[start:i2]
+        
+        # And switch components of the start and stop genes
+        # TODO: if i1 == i2, we can use one derivation
+        c1 = g1[i1].derive([(a1, g2[i1][a1:])])
+        c2 = g2[i1].derive([(a1, g1[i1][a1:])])
+        g1[i1], g2[i1] = c1, c2
+            
+        c1 = g1[i2].derive([(0, g2[i2][:a2])])
+        c2 = g2[i2].derive([(0, g1[i2][:a2])])
+        g1[i2], g2[i2] = c1, c2
+        
+        return self._child(g1), other._child(g2)
 
 
     def crossover_gene(self, other):
@@ -369,12 +381,9 @@ class Chromosome(object):
         @param other: second parent
         @return: child 1, child 2
         '''
+        g1, g2 = list(self.genes), list(other.genes)
+
         # Choose a random gene
-        i1 = random.choice(self._gene_starts)
-        i2 = i1 + self._gene_length
-        p1, p2 = self.chromosome, other.chromosome
-
-        child1 = p1[:i1] + p2[i1:i2] + p1[i2:]
-        child2 = p2[:i1] + p1[i1:i2] + p2[i2:]
-        return self._child(child1), self._child(child2)
-
+        gene = random.choice(xrange(len(g1)))
+        g1[gene], g2[gene] = g2[gene], g1[gene]
+        return self._child(g1), other._child(g2)
