@@ -267,13 +267,13 @@ class Chromosome(object):
         # Extract a transposition sequence. Truncate if required.
         start = random.choice(xrange(len(source)))
         end   = start + length
-        end   = len(source) if end > len(source) else end
+        end   = self.head if end > self.head else end
 
         # Offset into target gene: in the head but not the root
         offset = random.choice(xrange(1, self.head))
 
         # Insert into the target gene's head
-        replacement = source[start:end] + \
+        replacement = source[start:end][:self.head-offset] + \
                       genes[target][offset:self.head-end+start]
         genes[target] = genes[target].derive([(offset, replacement)])
         return self._child(genes)
@@ -296,7 +296,7 @@ class Chromosome(object):
             return self
 
         end = start + length
-        end = len(source) if end > len(source) else end
+        end = self.head if end > self.head else end
 
         # Insert into the target gene's head at position 0
         replacement   = source[start:end] + genes[target][:self.head+start-end]

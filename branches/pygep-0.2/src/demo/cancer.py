@@ -53,7 +53,7 @@ class TumorEvaluator(Chromosome):
             correct = 0
             for tumor in TRAIN_SAMPLE:
                 # Make a prediction about the tumor
-                benign = self.evaluate(tumor) > 0
+                benign = self(tumor) > 0
 
                 # And see if it's right...
                 if benign == tumor.benign:
@@ -93,8 +93,9 @@ if __name__ == '__main__':
     # Create our population and find a solution
     p = Population(TumorEvaluator, 50, 8, 4, sum_linker)
     print p
+    p.is_transposition_rate = 1
 
-    for _ in xrange(5):
+    for _ in xrange(50):
         if p.best.solved:
             break
         p.cycle()
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     # See how the best trained individual does on the test sample
     l, correct = len(TEST_SAMPLE), 0
     for tumor in TEST_SAMPLE:
-        benign = p.best.evaluate(tumor) > 0
+        benign = p.best(tumor) > 0
         if benign == tumor.benign:
             correct += 1
     print 'SCORE: %d / %d = %0.3f' % (correct, l, correct / float(l)),

@@ -36,7 +36,7 @@ class Regression(Chromosome):
 
     def _fitness(self):
         try:
-            total = sum(self.SELECTION_RANGE - abs(self.evaluate(x)-x.y)
+            total = sum(self.SELECTION_RANGE - abs(self(x)-x.y)
                         for x in DataPoint.SAMPLE)
             return int(max(total, 0.0))
         except ZeroDivisionError:
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     DataPoint.populate()
 
     # Search for a solution
-    p = Population(Regression, 20, 8, 4, sum_linker)
+    p = Population(Regression, 30, 8, 4, sum_linker)
     print p
 
     for _ in xrange(100):
@@ -59,8 +59,7 @@ if __name__ == '__main__':
         p.cycle()
         print
         print p
-
+        
     if p.best.solved:
         print
         print 'SOLVED:', p.best
-
