@@ -236,10 +236,10 @@ class Chromosome(object):
         if self.head < 2: # Head inversion does nothing in this case
             return self
 
-        chromosome = list(self.chromosome)
+        genes = list(self.genes)
 
         # Choose a random gene and two points within the head
-        gene = random.choice(self._gene_starts)
+        i = random.choice(xrange(len(self.genes)))
         start, stop = random.sample(xrange(self.head), 2)
 
         # Order the indexes correctly
@@ -247,11 +247,13 @@ class Chromosome(object):
             start, stop = stop, start
 
         # Create the new chromosome
-        chromosome[start:stop] = reversed(chromosome[start:stop])
-        if chromosome != self.chromosome:
-            return self._child(chromosome)
-        else:
-            return self
+        replacement = list(reversed(genes[i][start:stop]))
+        genes[i] = genes[i].derive([(start, replacement)])
+        
+        if genes != self.genes:
+            return self._child(genes)
+        
+        return self
 
 
     def transpose_is(self, length):
@@ -261,85 +263,73 @@ class Chromosome(object):
         if self.head < 2:
             return self
 
-        chromosome = list(self.chromosome)
-
         # Pick source and target genes
-        source = random.choice(self._gene_starts)
-        target = random.choice(self._gene_starts)
+        genes  = list(self.genes)
+        source = random.choice(genes)
+        target = random.choice(xrange(len(genes)))
 
         # Extract a transposition sequence. Truncate if required.
-        start = random.choice(xrange(self._gene_length))
+        start = random.choice(xrange(len(source)))
         end   = start + length
-        end   = self._gene_length if end > self._gene_length else end
+        end   = len(source) if end > len(source) else end
 
         # Offset into target gene: in the head but not the root
         offset = random.choice(xrange(1, self.head))
 
         # Insert into the target gene's head
-        chromosome[target:target+self.head] = (
-            chromosome[target:target+offset]    +
-            chromosome[source+start:source+end] +
-            chromosome[target+offset:target+self.head]
-        )[:self.head]
+        replacement = source[start:end] + \
+                      genes[target][offset:self.head-end+start]
+        genes[target] = genes[target].derive([(offset, replacement)])
 
-        if chromosome != self.chromosome:
-            return self._child(chromosome)
-        else:
-            return self
+        if genes != self.genes:
+            return self._child(genes)
+
+        return self
 
 
     def transpose_ris(self, length):
         '''Produces a new chromosome via RIS transposition'''
-        chromosome = list(self.chromosome)
-
         # Pick source and target genes
-        source = random.choice(self._gene_starts)
-        target = random.choice(self._gene_starts)
+        genes  = list(self.genes)
+        source = random.choice(genes)
+        target = random.choice(xrange(len(genes)))
 
         # Extract a transposition sequence. Truncate if required.
         # For RIS the sequence must begin with a function.
         try:
-            start = random.choice([
-                i for i in xrange(source, source+self._gene_length)
-                if callable(chromosome[i])
-            ])
+            start = random.choice(
+                [i for i in xrange(len(source)) if callable(source[i])]
+            )
         except IndexError: # no functions!
             return self
 
-        end, trunc = start+length, start+self._gene_length
-        end = trunc if end > trunc else end
+        end = start + length
+        end = len(source) if end > len(source) else end
 
-        # Insert into the target gene's head
-        chromosome[target:target+self.head] = (
-            chromosome[start:end] + chromosome[target:target+self.head]
-        )[:self.head]
+        # Insert into the target gene's head at position 0
+        replacement   = source[start:end] + genes[target][:self.head+start-end]
+        genes[target] = genes[target].derive([(0, replacement)])
 
-        if chromosome != self.chromosome:
-            return self._child(chromosome)
-        else:
-            return self
+        if genes != self.genes:
+            return self._child(genes)
+
+        return self
 
 
     def transpose_gene(self):
         '''Produces a new chromosome via gene transposition'''
-        s1 = random.choice(self._gene_starts)
-        t1 = random.choice(self._gene_starts)
-        if s1 == t1:
+        if len(self.genes) < 2:
             return self
+        
+        genes = list(self.genes)
+        s, t  = random.sample(xrange(len(genes)), 2)
 
         # Switch these genes
-        s2 = s1 + self._gene_length
-        t2 = t1 + self._gene_length
-        chromosome = list(self.chromosome)
+        genes[s], genes[t] = genes[t], genes[s]
+        if genes != self.genes:
+            return self._child(genes)
 
-        saved = chromosome[t1:t2]
-        chromosome[t1:t2] = chromosome[s1:s2]
-        chromosome[s1:s2] = saved
-
-        if chromosome != self.chromosome:
-            return self._child(chromosome)
-        else:
-            return self
+        return self
 
 
     def crossover_one_point(self, other):

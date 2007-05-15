@@ -116,6 +116,10 @@ class Population(object):
     def __iter__(self):
         return iter(self.population)
 
+    
+    def __getitem__(self, i):
+        return self.population[i]
+
 
     def _update_stats(self):
         # Compute fitness stats for the entire population

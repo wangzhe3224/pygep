@@ -108,6 +108,7 @@ class KarvaGene(object):
     def __getitem__(self, i):
         return self.alleles[i]
     
+    
     def __getslice__(self, i, j):
         return self.alleles[i:j]
     
