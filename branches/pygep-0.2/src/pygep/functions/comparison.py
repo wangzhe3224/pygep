@@ -31,8 +31,8 @@ Common comparison non-terminal functions:
 from pygep.chromosome import symbol
 
 
-__all__ = 'equal', 'unequal', 'less', 'greater', \
-          'less_or_equal', 'greater_or_equal'
+__all__ = 'equal', 'unequal', 'less', 'greater', 'less_or_equal', \
+          'greater_or_equal'
 
 
 @symbol('=')

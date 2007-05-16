@@ -47,4 +47,4 @@ def or_linker(*args):
     for arg in args:
         if arg:
             return True
-        return False
+    return False
