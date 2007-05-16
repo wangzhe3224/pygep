@@ -122,7 +122,7 @@ class Chromosome(object):
             yield cls(g, head, linker)
 
 
-    def __init__(self, genes, head, linker):
+    def __init__(self, genes, head, linker=default_linker):
         '''
         Instantiates a chromsome instance and analyzes it for evaluation.
         Sets the self.coding tuple to the last genes in the coding regions
@@ -152,6 +152,17 @@ class Chromosome(object):
 
     def __len__(self):
         return sum(len(g) for g in self.genes)
+
+
+    def __iter__(self):
+        for gene in self.genes:
+            for allele in gene:
+                yield allele    
+
+    
+    def __getitem__(self, i):
+        i, j = divmod(i, len(self.genes))
+        return self.genes[j][i]
 
 
     @cache

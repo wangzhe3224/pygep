@@ -25,27 +25,18 @@ class ChromosomeTest(unittest.TestCase):
         self.assertEqual(self.gene_length * self.genes, len(self.chromosome))
 
 
-    def testStarts(self):
-        # Where genes start
-        self.assertEqual(self.genes, len(self.chromosome._gene_starts))
-        for start in self.chromosome._gene_starts:
-            self.assertFalse(start % self.gene_length)
-
-
     def testStructure(self):
         self.assertEqual(Computation.symbols, self.symbols)
 
-        chr = self.chromosome.chromosome
-        for start in self.chromosome._gene_starts:
+        for gene in self.chromosome.genes:
             # Head can contain both terminals and non-terminals
-            for allele in chr[start:start+self.head]:
+            for allele in gene[:self.head]:
                 self.assertTrue(allele in self.symbols)
 
             # Tail only contains terminals
-            for allele in chr[start+self.head:start+self.gene_length]:
+            for allele in gene[self.head:]:
                 self.assertTrue(allele in Computation.terminals)
         
 
 if __name__ == '__main__':
     unittest.main()
-

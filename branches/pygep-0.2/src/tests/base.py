@@ -9,4 +9,3 @@ class Computation(Chromosome):
     ARITY = 2
     functions = multiply, add, subtract, divide
     terminals = 'a', 1, 2
-
