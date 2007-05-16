@@ -1,3 +1,4 @@
+from pygep.gene import KarvaGene
 from tests.base import Computation
 import unittest
 
@@ -36,7 +37,31 @@ class ChromosomeTest(unittest.TestCase):
             # Tail only contains terminals
             for allele in gene[self.head:]:
                 self.assertTrue(allele in Computation.terminals)
+    
+    
+    def testErrors(self):
+        self.assertRaises(ValueError, Computation, [], -1)
+        self.assertRaises(ValueError, Computation, [], 2)
+        self.assertRaises(NotImplementedError, self.chromosome._fitness)
         
+    
+    def testDefaultSolved(self):
+        self.assertFalse(self.chromosome.solved)
+
+
+    def testMultigenic(self):
+        class Foo(object):
+            a = b = c = d = e = f = 1
+        
+        # Representation
+        g1 = KarvaGene(['a', 'b', 'c'], 1)
+        g2 = KarvaGene(['d', 'e', 'f'], 1)
+        c = Computation([g1, g2], 1)
+        self.assertEqual('abcdef', repr(c))
+
+        # Evaluation
+        self.assertEqual((1, 1), c(Foo()))
+    
 
 if __name__ == '__main__':
     unittest.main()

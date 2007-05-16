@@ -266,7 +266,7 @@ class Chromosome(object):
             start, stop = stop, start
 
         # Create the new chromosome
-        replacement = list(reversed(genes[i][start:stop]))
+        replacement = list(reversed(genes[i][start:stop+1]))
         genes[i] = genes[i].derive([(start, replacement)])
         return self._child(genes)
 
