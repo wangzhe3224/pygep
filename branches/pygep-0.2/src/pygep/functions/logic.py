@@ -35,23 +35,23 @@ __all__ = 'and_op', 'or_op', 'not_op', 'if_op'
 
 @symbol('&')
 def and_op(i, j):
-    '''Returns i and j'''
+    '''@return: i and j'''
     return i and j
 
 
 @symbol('|')
 def or_op(i, j):
-    '''Returns i or j'''
+    '''@return: i or j'''
     return i or j
 
 
 @symbol('!')
 def not_op(i):
-    '''Returns not i'''
+    '''@return: not i'''
     return not i
 
 
 @symbol('I')
 def if_op(i, j, k):
-    '''Returns j if i else k'''
+    '''@return: j if i else k'''
     return j if i else k

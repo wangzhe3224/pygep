@@ -109,6 +109,7 @@ class Population(object):
 
 
     def __repr__(self):
+        '''@return: repr of population with header and statistical info'''
         header = '[Generation: %s  |  Best: #%s (%s)  |  Mean: %0.1f]\n%s' % \
             (self.age, self.best.id, self.best.fitness, self.mean, self.header)
         max_id_len = max(len(str(i.id)) for i in self)
@@ -119,14 +120,17 @@ class Population(object):
 
 
     def __len__(self):
+        '''@return: number of chromosomes in the population'''
         return self.size
 
 
     def __iter__(self):
+        '''@return: iterator over population chromosomes'''
         return iter(self.population)
 
     
     def __getitem__(self, i):
+        '''@return: a given chromosome number'''
         return self.population[i]
 
 
@@ -144,7 +148,10 @@ class Population(object):
 
 
     def solve(self, generations):
-        '''Cycles a number of generations. Stops if self.solved()'''
+        '''
+        Cycles a number of generations. Stops if self.solved()
+        @param generations: # of genrations to give up after
+        '''
         for _ in xrange(generations):
             if self.best.solved:
                 break
@@ -253,4 +260,3 @@ class Population(object):
         self._next_pop, self.population = self.population, self._next_pop
         self.__age += 1
         self._update_stats()
-

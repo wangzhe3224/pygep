@@ -37,35 +37,35 @@ __all__ = 'equal', 'unequal', 'less', 'greater', 'less_or_equal', \
 
 @symbol('=')
 def equal(i, j):
-    '''Returns i if i == j else j'''
+    '''@return: i if i == j else j'''
     return i if i == j else j
 
 
 @symbol('U')
 def unequal(i, j):
-    '''Returns i if i != j else j'''
+    '''@return: i if i != j else j'''
     return i if i != j else j
 
 
 @symbol('<')
 def less(i, j):
-    '''Returns i if i < j else j'''
+    '''@return: i if i < j else j'''
     return i if i < j else j
 
 
 @symbol('>')
 def greater(i, j):
-    '''Returns i if i > j else j'''
+    '''@return: i if i > j else j'''
     return i if i > j else j
 
 
 @symbol('L')
 def less_or_equal(i, j):
-    '''Returns i if i <= j else j'''
+    '''@return: i if i <= j else j'''
     return i if i <= j else j
 
 
 @symbol('G')
 def greater_or_equal(i, j):
-    '''Returns i if i >= j else j'''
+    '''@return: i if i >= j else j'''
     return i if i >= j else j

@@ -31,19 +31,19 @@ __all__ = 'default_linker', 'sum_linker', 'or_linker'
 
 
 def default_linker(*args):
-    '''Returns either a single value or a tuple, depending on context'''
+    '''@return: either a single value or a tuple, depending on context'''
     if len(args) == 1:
         return args[0]
     return args
 
 
 def sum_linker(*args):
-    '''Returns the sum of all sub-ETs'''
+    '''@return: the sum of all sub-ETs'''
     return sum(args)
 
 
 def or_linker(*args):
-    '''Returns the OR of all given args'''
+    '''@return: the OR of all given args'''
     for arg in args:
         if arg:
             return True

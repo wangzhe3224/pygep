@@ -86,6 +86,7 @@ class KarvaGene(object):
 
 
     def __repr__(self):
+        '''@return: repr of gene alleles'''
         gene_str = ''
         for allele in self.alleles:
             # Differentiate between functions and terminals
@@ -104,18 +105,22 @@ class KarvaGene(object):
 
     
     def __len__(self):
+        '''@return: number of alleles in the gene'''
         return len(self.alleles)
     
     
     def __iter__(self):
+        '''@return: iterator over gene alleles'''
         return iter(self.alleles)
     
     
     def __getitem__(self, i):
+        '''@return: an individual allele from the gene'''
         return self.alleles[i]
     
     
     def __getslice__(self, i, j):
+        '''@return: a slice of alleles'''
         return self.alleles[i:j]
     
     

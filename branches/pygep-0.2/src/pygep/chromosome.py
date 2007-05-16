@@ -37,9 +37,14 @@ def symbol(symb):
         @symbol('/')
         def divide(x, y):
             return x / y
+    
+    @param symb: symbol to use, typically one character
     '''
     def decorator(func):
-        '''Attaches a symbol to a function as its 'symbol' attribute'''
+        '''
+        Attaches a symbol to a function as its 'symbol' attribute
+        @param func: function to decorate
+        '''
         func.symbol = symb
         return func
 
@@ -55,6 +60,15 @@ class MetaChromosome(type):
     Also turns caching of fitness values on for all chromosomes.
     '''
     def __new__(mcs, name, bases, dct):
+        '''
+        Prepares a chromosome type for use in GEP, assigning to 
+        cls.symbols, cls.arity, and caching the cls._fitness.
+        
+        @param mcs:   class to apply the metaclass to
+        @param name:  name of the class
+        @param bases: base classes
+        @param dct:   class dict
+        '''
         typ = type.__new__(mcs, name, bases, dct)
         typ.symbols = typ.functions + typ.terminals
 
@@ -160,27 +174,39 @@ class Chromosome(object):
 
 
     def __len__(self):
+        '''@return: total number of alleles in the chromosome'''
         return sum(len(g) for g in self.genes)
 
 
     def __iter__(self):
+        '''@return: generator for alleles in chromosome'''
         for gene in self.genes:
             for allele in gene:
                 yield allele    
 
     
     def __getitem__(self, i):
+        '''
+        Returns a given allele by index
+        @param i: allele index
+        @return:  allele
+        '''
         i, j = divmod(i, len(self.genes))
         return self.genes[j][i]
 
 
     @cache
     def __repr__(self):
+        '''@return: repr of chromosome alleles'''
         return ''.join(repr(g) for g in self.genes)
 
 
     def _child(self, genes):
-        '''Returns a child chromosome of self (or self if they are the same)'''
+        '''
+        Creates a child chromosome
+        @param genes: ordered list of GEP genes
+        @return:      a child chromosome of self
+        '''
         if genes != self.genes:
             return type(self)(genes, self.head, self.linker)
         return self
@@ -203,11 +229,11 @@ class Chromosome(object):
 
 
     def _fitness(self):
-        '''Abstract base method for fitness determination'''
+        '''@return: comparable fitness value'''
         raise NotImplementedError('Must override Chromosome._fitness')
 
     def _solved(self):
-        '''Defaults to False.  Override to terminate early.'''
+        '''@return: boolean indicating optimal solution found'''
         return False
 
     fitness = property(lambda self: self._fitness(), doc='Fitness value')
@@ -251,7 +277,10 @@ class Chromosome(object):
 
 
     def invert(self):
-        '''Produces a new chromosome via head inversion'''
+        '''
+        Produces a new chromosome via head inversion
+        @return: child chromosome
+        '''
         if self.head < 2: # Head inversion does nothing in this case
             return self
 
@@ -271,9 +300,12 @@ class Chromosome(object):
         return self._child(genes)
 
 
-
     def transpose_is(self, length):
-        '''Produces a new chromosome via IS transposition'''
+        '''
+        Produces a new chromosome via IS transposition
+        @param length: sequence length (typically 1, 2, or 3)
+        @return:       child chromosome
+        '''
         # Since IS does not transpose to the root, it has no purpose
         # if the head length is less than 2.
         if self.head < 2:
@@ -300,7 +332,11 @@ class Chromosome(object):
 
 
     def transpose_ris(self, length):
-        '''Produces a new chromosome via RIS transposition'''
+        '''
+        Produces a new chromosome via RIS transposition
+        @param length: sequence length (typically 1, 2, or 3)
+        @return:       child chromosome
+        '''
         # Pick source and target genes
         genes  = list(self.genes)
         source = random.choice(genes)
@@ -325,7 +361,10 @@ class Chromosome(object):
 
 
     def transpose_gene(self):
-        '''Produces a new chromosome via gene transposition'''
+        '''
+        Produces a new chromosome via gene transposition
+        @return: child chromosome
+        '''
         if len(self.genes) < 2:
             return self
         

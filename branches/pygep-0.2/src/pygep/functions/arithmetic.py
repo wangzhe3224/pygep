@@ -40,19 +40,19 @@ __all__ = 'add', 'subtract', 'multiply', 'divide', 'power', 'root'
 
 @symbol('*')
 def multiply(i, j):
-    '''Returns i * j'''
+    '''@return: i * j'''
     return i * j
 
 
 @symbol('+')
 def add(i, j):
-    '''Returns i + j'''
+    '''@return: i + j'''
     return i + j
 
 
 @symbol('-')
 def subtract(i, j):
-    '''Returns i - j'''
+    '''@return: i - j'''
     return i - j
 
 
@@ -60,21 +60,21 @@ def subtract(i, j):
 def divide(i, j):
     '''
     Returns i / j
-    @raises ZeroDivisionError
+    @raise ZeroDivisionError: division by 0 
     '''
     return i / j
 
 
 @symbol('^')
 def power(i, j):
-    '''Returns i ** j'''
+    '''@return: i ** j'''
     return i ** j
 
 
 @symbol('Q')
 def root(i):
     '''
-    Returns square root of i
-    @raises ValueError
+    @return: square root of i
+    @raise ValueError: invalid square root input
     '''
     return math.sqrt(i)
