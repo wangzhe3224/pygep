@@ -14,25 +14,33 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-from itertools import izip
+
+'''
+Provides standard GEP chromosomes as well as the symbol decorator for
+defining functions for use in chromosomes.  Note that the Chromosome 
+class is an abstract base class, providing methods for construction and 
+evaluation of genes.  Chromosomes that inherit from it should provide
+a set of terminal and function symbols.
+'''
+
 from pygep.functions.linkers import default_linker
 from pygep.gene import KarvaGene
 from pygep.util import cache
-import functools, random
+import random
 
 
-
-def symbol(s):
+def symbol(symb):
     '''
-    Decorator that assigns a symbol to a function for chromosome display.
-    The symbol is stored in the function.symbol attribute.
+    Decorator that assigns a symbol to a function for chromosome 
+    display. The symbol is stored in the function.symbol attribute.
 
         @symbol('/')
         def divide(x, y):
             return x / y
     '''
     def decorator(func):
-        func.symbol = s
+        '''Attaches a symbol to a function as its 'symbol' attribute'''
+        func.symbol = symb
         return func
 
     return decorator
@@ -46,19 +54,19 @@ class MetaChromosome(type):
         - symbols: symbols that can reside in the head
     Also turns caching of fitness values on for all chromosomes.
     '''
-    def __new__(typ, *args, **kwds):
-        t = type.__new__(typ, *args, **kwds)
-        t.symbols = t.functions + t.terminals
+    def __new__(mcs, name, bases, dct):
+        typ = type.__new__(mcs, name, bases, dct)
+        typ.symbols = typ.functions + typ.terminals
 
         # Find the max arity
         try:
-            t.arity = max([f.func_code.co_argcount for f in t.functions])
+            typ.arity = max([f.func_code.co_argcount for f in typ.functions])
         except ValueError:
-            t.arity = 0
+            typ.arity = 0
 
         # Cache fitness values
-        t._fitness = cache(t._fitness)
-        return t
+        typ._fitness = cache(typ._fitness)
+        return typ
 
 
 class Chromosome(object):
@@ -98,8 +106,9 @@ class Chromosome(object):
 
     functions = ()
     terminals = ()
-    head = tail = length = 0
-
+    symbols   = () # overridden by metaclass
+    head = tail = length = arity = 0
+    
 
     @classmethod
     def generate(cls, head, genes=1, linker=default_linker):
@@ -112,14 +121,14 @@ class Chromosome(object):
         tail = head * (cls.arity - 1) + 1
 
         while True:
-            g = [None] * genes
+            new_genes = [None] * genes
             for i in xrange(genes):
-                g[i] = cls.gene_type(
+                new_genes[i] = cls.gene_type(
                     [random.choice(cls.symbols)   for _ in xrange(head)] + \
                     [random.choice(cls.terminals) for _ in xrange(tail)], head
                 )
 
-            yield cls(g, head, linker)
+            yield cls(new_genes, head, linker)
 
 
     def __init__(self, genes, head, linker=default_linker):
@@ -131,7 +140,7 @@ class Chromosome(object):
         much more common to create them via calls to the static method
         Chromosome.generate(...).
 
-        @param genes:  number of genes in the chromosome (min=1)
+        @param genes:  genes in the chromosome
         @param head:   length (not index) of the gene heads (min=0)
         @param linker: linker function for gene evaluation
         '''
@@ -211,7 +220,7 @@ class Chromosome(object):
         locus.  If nothing changes, the original chromosome is returned.
 
         @param rate: mutation rate per locus
-        @return: child chromosome (or self)
+        @return:     child chromosome (or self)
         '''
         genes = list(self.genes)
         
@@ -321,10 +330,10 @@ class Chromosome(object):
             return self
         
         genes = list(self.genes)
-        s, t  = random.sample(xrange(len(genes)), 2)
+        source, target  = random.sample(xrange(len(genes)), 2)
 
         # Switch these genes
-        genes[s], genes[t] = genes[t], genes[s]
+        genes[source], genes[target] = genes[target], genes[source]
         return self._child(genes)
 
 
@@ -332,69 +341,69 @@ class Chromosome(object):
         '''
         Produces two children via one-point crossover
         @param other: second parent
-        @return: child 1, child 2
+        @return:      child 1, child 2
         '''
-        g1, g2 = list(self.genes), list(other.genes)
+        genes1, genes2 = list(self.genes), list(other.genes)
         
         # Pick a gene and index to crossover at
-        gene  = random.choice(xrange(len(g1)))
-        index = random.choice(xrange(len(g1[gene])))
+        gene  = random.choice(xrange(len(genes1)))
+        index = random.choice(xrange(len(genes1[gene])))
         
         # Construct new child genes
-        c1 = g1[gene].derive([(index, g2[gene][index:])])
-        c2 = g2[gene].derive([(index, g1[gene][index:])])
-        g1[gene], g2[gene] = c1, c2
-        return self._child(g1), other._child(g2)
+        child1 = genes1[gene].derive([(index, genes2[gene][index:])])
+        child2 = genes2[gene].derive([(index, genes1[gene][index:])])
+        genes1[gene], genes2[gene] = child1, child2
+        return self._child(genes1), other._child(genes2)
 
 
     def crossover_two_point(self, other):
         '''
         Produces two children via two-point crossover
         @param other: second parent
-        @return: child 1, child 2
+        @return:      child 1, child 2
         '''
         if len(self) < 2:
             return self, other
 
-        g1, g2 = list(self.genes), list(other.genes)
+        genes1, genes2 = list(self.genes), list(other.genes)
 
         # Choose start and stop loci
-        i1, i2 = random.sample(xrange(len(self)), 2)
-        if i1 > i2:
-            i1, i2 = i2, i1
+        ind1, ind2 = random.sample(xrange(len(self)), 2)
+        if ind1 > ind2:
+            ind1, ind2 = ind2, ind1
         
         # Convert these to gene and allele numbers
         gene_length = len(self.genes[0])
-        i1, a1 = divmod(i1, gene_length)
-        i2, a2 = divmod(i2, gene_length)
+        ind1, allele1 = divmod(ind1, gene_length)
+        ind2, allele2 = divmod(ind2, gene_length)
 
         # Switch genes in between the modified genes
-        if i2 - i1 > 1:
-            start = i1 + 1
-            g1[start:i2], g2[start:i2] = g2[start:i2], g1[start:i2]
+        if ind2 - ind1 > 1:
+            start = ind1 + 1
+            genes1[start:ind2], genes2[start:ind2] = \
+                genes2[start:ind2], genes1[start:ind2]
         
         # And switch components of the start and stop genes
-        # TODO: if i1 == i2, we can use one derivation
-        c1 = g1[i1].derive([(a1, g2[i1][a1:])])
-        c2 = g2[i1].derive([(a1, g1[i1][a1:])])
-        g1[i1], g2[i1] = c1, c2
+        child1 = genes1[ind1].derive([(allele1, genes2[ind1][allele1:])])
+        child2 = genes2[ind1].derive([(allele1, genes1[ind1][allele1:])])
+        genes1[ind1], genes2[ind1] = child1, child2
             
-        c1 = g1[i2].derive([(0, g2[i2][:a2])])
-        c2 = g2[i2].derive([(0, g1[i2][:a2])])
-        g1[i2], g2[i2] = c1, c2
+        child1 = genes1[ind2].derive([(0, genes2[ind2][:allele2])])
+        child2 = genes2[ind2].derive([(0, genes1[ind2][:allele2])])
+        genes1[ind2], genes2[ind2] = child1, child2
         
-        return self._child(g1), other._child(g2)
+        return self._child(genes1), other._child(genes2)
 
 
     def crossover_gene(self, other):
         '''
         Produces two children via full gene crossover
         @param other: second parent
-        @return: child 1, child 2
+        @return:      child 1, child 2
         '''
-        g1, g2 = list(self.genes), list(other.genes)
+        genes1, genes2 = list(self.genes), list(other.genes)
 
         # Choose a random gene
-        gene = random.choice(xrange(len(g1)))
-        g1[gene], g2[gene] = g2[gene], g1[gene]
-        return self._child(g1), other._child(g2)
+        gene = random.choice(xrange(len(genes1)))
+        genes1[gene], genes2[gene] = genes2[gene], genes1[gene]
+        return self._child(genes1), other._child(genes2)

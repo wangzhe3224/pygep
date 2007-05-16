@@ -14,9 +14,6 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-from pygep.chromosome import symbol
-import math
-
 
 '''
 Provides basic arithmetic non-terminals for use in Chromosomes.
@@ -34,48 +31,50 @@ Common mathematical non-terminal functions and symbols:
     - (Q) root
 '''
 
+from pygep.chromosome import symbol
+import math
+
 
 __all__ = 'add', 'subtract', 'multiply', 'divide', 'power', 'root'
 
 
 @symbol('*')
-def multiply(x, y):
-    '''Returns x * y'''
-    return x * y
+def multiply(i, j):
+    '''Returns i * j'''
+    return i * j
 
 
 @symbol('+')
-def add(x, y):
-    '''Returns x + y'''
-    return x + y
+def add(i, j):
+    '''Returns i + j'''
+    return i + j
 
 
 @symbol('-')
-def subtract(x, y):
-    '''Returns x - y'''
-    return x - y
+def subtract(i, j):
+    '''Returns i - j'''
+    return i - j
 
 
 @symbol('/')
-def divide(x, y):
+def divide(i, j):
     '''
-    Returns x / y
+    Returns i / j
     @raises ZeroDivisionError
     '''
-    return x / y
+    return i / j
 
 
 @symbol('^')
-def power(x, y):
-    '''Returns x ** y'''
-    return x ** y
+def power(i, j):
+    '''Returns i ** j'''
+    return i ** j
 
 
 @symbol('Q')
-def root(x):
+def root(i):
     '''
-    Returns square root of x
+    Returns square root of i
     @raises ValueError
     '''
-    return math.sqrt(x)
-
+    return math.sqrt(i)

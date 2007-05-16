@@ -15,3 +15,12 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  
+'''
+Provides pre-packaged GEP functions:
+    - pygep.functions.arithmetic
+    - pygep.functions.comparison
+    - pygep.functions.logic
+    
+And linkers for multigenic chromosomes:
+    -pygep.functions.linkers
+'''

@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-from pygep.chromosome import symbol
-
 
 '''
 Provides basic comparison non-terminals.  If each is true, it returns
@@ -30,43 +28,44 @@ Common comparison non-terminal functions:
     - (G) greater_or_equal
 '''
 
+from pygep.chromosome import symbol
+
 
 __all__ = 'equal', 'unequal', 'less', 'greater', \
           'less_or_equal', 'greater_or_equal'
 
 
 @symbol('=')
-def equal(x, y):
-    '''Returns x if x == y else y'''
-    return x if x == y else y
+def equal(i, j):
+    '''Returns i if i == j else j'''
+    return i if i == j else j
 
 
 @symbol('U')
-def unequal(x, y):
-    '''Returns x if x != y else y'''
-    return x if x != y else y
+def unequal(i, j):
+    '''Returns i if i != j else j'''
+    return i if i != j else j
 
 
 @symbol('<')
-def less(x, y):
-    '''Returns x if x < y else y'''
-    return x if x < y else y
+def less(i, j):
+    '''Returns i if i < j else j'''
+    return i if i < j else j
 
 
 @symbol('>')
-def greater(x, y):
-    '''Returns x if x > y else y'''
-    return x if x > y else y
+def greater(i, j):
+    '''Returns i if i > j else j'''
+    return i if i > j else j
 
 
 @symbol('L')
-def less_or_equal(x, y):
-    '''Returns x if x <= y else y'''
-    return x if x <= y else y
+def less_or_equal(i, j):
+    '''Returns i if i <= j else j'''
+    return i if i <= j else j
 
 
 @symbol('G')
-def greater_or_equal(x, y):
-    '''Returns x if x >= y else y'''
-    return x if x >= y else y
-
+def greater_or_equal(i, j):
+    '''Returns i if i >= j else j'''
+    return i if i >= j else j

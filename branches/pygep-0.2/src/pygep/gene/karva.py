@@ -14,26 +14,34 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+'''
+Provides Karva genes, the unigenic building block used in GEP
+for multigenic chromosomes.  This allows one to cache chromosome
+evaluation more efficiently.
+'''
+
 from copy import copy
 from pygep.util import memoize
 
 
 class KarvaGene(object):
     '''
-    Represents a single gene that is evaluated as Karva language.  These are
-    intended only for internal use by the Chromosome class, which will
-    generate the gene contents and link together one or more genes.  Genes,
-    in turn, are responsible for generating and caching evaluation results.
+    Represents a single gene that is evaluated as Karva language.  
+    These are intended only for internal use by the Chromosome class,
+    which will generate the gene contents and link together one or 
+    more genes.  Genes, in turn, are responsible for generating and
+    caching evaluation results.
     '''
     def __init__(self, alleles, head):
         '''
-        
-        @param alleles: individual loci for a given chromosome
+        Instantiates a Karva style unigenic GEP chromosome
+        @param alleles: list of individual loci for a given chromosome
         @param head:    head length
         '''
         self.alleles = alleles
         self.head    = head
-        
+        self.coding  = 0
         self._find_coding()
 
     
@@ -47,11 +55,9 @@ class KarvaGene(object):
         @param obj: some object instance
         @return:    result of evaluating the gene
         '''
-        # TODO: currently we cache by object identities.  Perhaps we should
-        #       memoize on the relevant object attributes instead?
-        
         # Prepare our evaluation list -> results of expression evaluation
         def _value(allele):
+            '''Returns the evaluation of a given allele to obj'''
             if callable(allele):
                 return None
             elif not isinstance(allele, str):
@@ -80,7 +86,7 @@ class KarvaGene(object):
 
 
     def __repr__(self):
-        s = ''
+        gene_str = ''
         for allele in self.alleles:
             # Differentiate between functions and terminals
             try:
@@ -92,9 +98,9 @@ class KarvaGene(object):
                     name = str(allele)
 
             # If the name is not one char, surround it with { }
-            s += name if len(name) == 1 else '{%s}' % name
+            gene_str += name if len(name) == 1 else '{%s}' % name
 
-        return s
+        return gene_str
 
     
     def __len__(self):
@@ -154,14 +160,14 @@ class KarvaGene(object):
         new  = None # new gene
         same = True # whether or not the coding region is the same
         for index, alleles in changes:
-            l = len(alleles)
+            length = len(alleles)
             
-            if self[index:index+l] != alleles:
+            if self[index:index+length] != alleles:
                 # Copy the alleles on first change
                 if not new:
-                    new = self[:index] + alleles + self[index+l:]
+                    new = self[:index] + alleles + self[index+length:]
                 else:
-                    new[index:index+l] = alleles
+                    new[index:index+length] = alleles
                 
                 # Does this change the coding region?
                 if same and index <= self.coding:

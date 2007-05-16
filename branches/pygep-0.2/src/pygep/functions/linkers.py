@@ -15,7 +15,6 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
 '''
 Provides linkers for combining multigenic chromosomes.  In general
 PyGEP linkers should accept and process any number of arguments,
@@ -45,7 +44,7 @@ def sum_linker(*args):
 
 def or_linker(*args):
     '''Returns the OR of all given args'''
-    for x in args:
-        if x:
+    for arg in args:
+        if arg:
             return True
         return False

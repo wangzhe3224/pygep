@@ -14,6 +14,12 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+'''
+Provides a Population class for managing multiple GEP chromosomes
+over time, allowing selection, replication, and variation operators.
+'''
+
 from itertools import izip
 from operator import attrgetter
 from pygep.functions.linkers import default_linker
@@ -54,9 +60,9 @@ class Population(object):
     mutation_rate            = 0.0 # Set by __init__
     inversion_rate           = 0.1
     is_transposition_rate    = 0.1
-    is_transposition_length  = 1,2,3
+    is_transposition_length  = 1, 2, 3
     ris_transposition_rate   = 0.1
-    ris_transposition_length = 1,2,3
+    ris_transposition_length = 1, 2, 3
     gene_transposition_rate  = 0.1
     crossover_one_point_rate = 0.3
     crossover_two_point_rate = 0.3
@@ -87,15 +93,18 @@ class Population(object):
 
         # Header for display purposes
         try:
-            l = len(self.population[0])
-            self.header = string.digits * (l / len(string.digits)) + \
-                          string.digits[:(l % len(string.digits))]
+            chr_length = len(self.population[0])
+            self.header = string.digits * (chr_length / len(string.digits)) + \
+                          string.digits[:(chr_length % len(string.digits))]
             self.header += '\n' + '-' * len(self.header)
         except IndexError:
             raise ValueError('Empty populations are meaningless!')
 
         # Determine mutation rate
-        self.mutation_rate = 2.0 / l
+        self.mutation_rate = 2.0 / chr_length
+        
+        # Compute stats about the initial generation
+        self.stdev = self.mean = 0
         self._update_stats()
 
 
@@ -122,7 +131,7 @@ class Population(object):
 
 
     def _update_stats(self):
-        # Compute fitness stats for the entire population
+        '''Assigns to self.mean and stdev population fitness stats'''
         self.mean, self.stdev, _ = stats.fitness_stats(self)
 
 
@@ -135,20 +144,23 @@ class Population(object):
 
 
     def solve(self, generations):
-        '''Cycles a number of generations. Stops if chrom.solved()'''
-        pass
+        '''Cycles a number of generations. Stops if self.solved()'''
+        for _ in xrange(generations):
+            if self.best.solved:
+                break
+            self.cycle()
 
 
     def cycle(self):
-        '''Selects and recombines the next generation'''
+        '''Selects, replicates and recombines the next generation'''
         # Copy the best individual via simple elitism
         self._next_pop[0] = self.best
 
         if self.mean > 0:
             # Fill in the rest through fitness scaling. First compute the
             # sigma-scaled fitness proportionate value for each chromosome.
-            for i, c in enumerate(self.population):
-                self._scaled[i] = self.exclusion_level * c.fitness / self.mean
+            for i, j in enumerate(self.population):
+                self._scaled[i] = self.exclusion_level * j.fitness / self.mean
             scaling = sum(self._scaled)
 
             # Then generate n-1 spins of the roulette wheel
@@ -189,8 +201,8 @@ class Population(object):
         for i in xrange(1, self.size):
             # Try and mutate each individual
             if self.mutation_rate:
-                self._next_pop[i] = self._next_pop[i].mutate(
-                                        self.mutation_rate)
+                self._next_pop[i] = self._next_pop[i].mutate(self.mutation_rate)
+                
             # Then inversion
             if self.inversion_rate and random.random() < self.inversion_rate:
                 self._next_pop[i] = self._next_pop[i].invert()
@@ -215,21 +227,27 @@ class Population(object):
         # Then try one|two-point and gene crossover - exclude best
         if self.crossover_one_point_rate and \
            random.random() < self.crossover_one_point_rate:
-            i1, i2 = random.sample(xrange(1, self.size), 2)
-            p1, p2 = self._next_pop[i1], self._next_pop[i2]
-            self._next_pop[i1], self._next_pop[i2] = p1.crossover_one_point(p2)
+            ind1, ind2 = random.sample(xrange(1, self.size), 2)
+            par1, par2 = self._next_pop[ind1], self._next_pop[ind2]
+            
+            children = par1.crossover_one_point(par2)
+            self._next_pop[ind1], self._next_pop[ind2] = children
 
         if self.crossover_two_point_rate and \
            random.random() < self.crossover_two_point_rate:
-            i1, i2 = random.sample(xrange(1, self.size), 2)
-            p1, p2 = self._next_pop[i1], self._next_pop[i2]
-            self._next_pop[i1], self._next_pop[i2] = p1.crossover_two_point(p2)
+            ind1, ind2 = random.sample(xrange(1, self.size), 2)
+            par1, par2 = self._next_pop[ind1], self._next_pop[ind2]
+            
+            children = par1.crossover_two_point(par2)
+            self._next_pop[ind1], self._next_pop[ind2] = children
 
         if self.crossover_gene_rate and \
            random.random() < self.crossover_gene_rate:
-            i1, i2 = random.sample(xrange(1, self.size), 2)
-            p1, p2 = self._next_pop[i1], self._next_pop[i2]
-            self._next_pop[i1], self._next_pop[i2] = p1.crossover_gene(p2)
+            ind1, ind2 = random.sample(xrange(1, self.size), 2)
+            par1, par2 = self._next_pop[ind1], self._next_pop[ind2]
+            
+            children = par1.crossover_gene(par2)
+            self._next_pop[ind1], self._next_pop[ind2] = children
 
         # Switch to the next generation and increment age
         self._next_pop, self.population = self.population, self._next_pop

@@ -15,6 +15,11 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+'''
+Package for gene implementations.  At the moment this consists
+of nothing more than the standard KarvaGene.
+'''
+
 from pygep.gene.karva import KarvaGene
 
 __all__ = 'KarvaGene',

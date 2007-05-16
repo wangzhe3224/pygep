@@ -14,6 +14,12 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+'''
+Provides a functions for computating fitness statistics about
+a given population
+'''
+
 import math
 
 
@@ -30,4 +36,3 @@ def fitness_stats(population):
     deviation = math.sqrt((1/num) * variance)
 
     return mean, deviation, float(total)
-

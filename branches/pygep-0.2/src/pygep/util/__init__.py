@@ -14,6 +14,11 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+'''
+Provides commonly used decorators for caching and memoization
+'''
+
 import functools
 
 
@@ -33,6 +38,7 @@ def cache(func):
 
     @functools.wraps(func)
     def wrapper(self):
+        '''Assigns a cache attribute to self on demand'''
         try:
             return getattr(self, cache_name)
             
@@ -59,6 +65,7 @@ def memoize(func):
     
     @functools.wraps(func)
     def wrapper(self, *args):
+        '''Assigns a memo hash to self on demand'''
         try:
             memo = getattr(self, memo_name)
         except AttributeError:

@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU General Public License along
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-from pygep.chromosome import symbol
-
 
 '''
 Provides basic logical operators: and, or, not, if.  The former 
@@ -29,30 +27,31 @@ Common logic non-terminal functions:
     - (I) if_op
 '''
 
+from pygep.chromosome import symbol
+
 
 __all__ = 'and_op', 'or_op', 'not_op', 'if_op'
 
 
 @symbol('&')
-def and_op(x, y):
-    '''Returns x and y'''
-    return x and y
+def and_op(i, j):
+    '''Returns i and j'''
+    return i and j
 
 
 @symbol('|')
-def or_op(x, y):
-    '''Returns x or y'''
-    return x or y
+def or_op(i, j):
+    '''Returns i or j'''
+    return i or j
 
 
 @symbol('!')
-def not_op(x):
-    '''Returns not x'''
-    return not x
+def not_op(i):
+    '''Returns not i'''
+    return not i
 
 
 @symbol('I')
-def if_op(x, y, z):
-    '''Returns y if x else z'''
-    return y if x else z
-
+def if_op(i, j, k):
+    '''Returns j if i else k'''
+    return j if i else k
