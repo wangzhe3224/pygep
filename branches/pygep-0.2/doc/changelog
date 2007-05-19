@@ -2,7 +2,7 @@ PyGEP Change Log
 
 0.2.0 beta
 	* Issue #3: performance improvement via gene separation
-	# Genes and chromosomes are now evaluated via __call__
+	* Genes and chromosomes are now evaluated via __call__
 	* Docstring enhancements; better unit test coverage
 	* Minor bug fixes
 
