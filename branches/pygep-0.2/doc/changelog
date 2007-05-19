@@ -1,6 +1,11 @@
 PyGEP Change Log
 
-0.2.0 beta
+0.2.1 beta
+	* Extensive stability testing
+	* Issue #3: evaluation lists need only be as long as the coding region
+	* Documentation updates
+
+0.2.0 dev
 	* Issue #3: performance improvement via gene separation
 	* Genes and chromosomes are now evaluated via __call__
 	* Docstring enhancements; better unit test coverage

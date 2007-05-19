@@ -2,8 +2,9 @@ Frequently Asked Questions
 
 See http://code.google.com/p/pygep/ for full documentation
 
-
+-------------------------------------------------------------------------------
 Q:	How can I write my own GEP functions?
+
 A:	Simple:
 
         from pygep.chromosome import symbol
@@ -19,9 +20,11 @@ A:	Simple:
 	not do anything.
 
 	See pygep.functions for examples.
+	
 
-
+-------------------------------------------------------------------------------
 Q:	Can I provide my own linkers?
+
 A:	Of course! A PyGEP linker just needs to accept *args and return a single 
 	result. See the sum_linker code for an example:
 
@@ -31,3 +34,28 @@ A:	Of course! A PyGEP linker just needs to accept *args and return a single
 
 	If you do not provide a linker for your population, the default linker will 
 	simply return the top results of each gene's evaluation.
+	
+
+-------------------------------------------------------------------------------
+Q:	I know that GEP programs will always be syntactically correct provided I
+	use compatible types for my operators and operands, but what do I do about
+	semantic errors such as division by zero?
+
+A:	Chromosome evaluation doesn't swallow run time errors, so anything like
+	this will be raised to whatever level you evaluate at, typically in the
+	_fitness(self, obj) method.  The usual practice is to catch any such
+	errors that occur and dock the responsible individual's fitness.  See the
+	fitness method of the regression demo for an example of this:
+	
+	    def _fitness(self):
+	        total = 0
+	        for x in DataPoint.SAMPLE:
+	            try:
+	                guess = self(x) # Evaluation of this chromosome
+	                diff = min(1.0, abs((x.y - guess) / x.y))
+	                total += self.REWARD * (1 - diff)
+	                                
+	            except ZeroDivisionError: # semantic error
+	                pass
+	
+	        return total	
