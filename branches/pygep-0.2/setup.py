@@ -9,7 +9,7 @@ if sys.version_info[:2] < (2, 5):
 
 setup(
     name         = 'PyGEP',
-    version      = '0.2.0',
+    version      = '0.2.1',
     license      = 'GPL',
     description  = 'Gene Expression Programming for Python',
     author       = "Ryan J. O'Neil",
