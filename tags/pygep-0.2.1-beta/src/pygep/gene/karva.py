@@ -65,9 +65,12 @@ class KarvaGene(object):
                 return allele
             else:
                 return getattr(obj, allele)
+            
+        # The evaluation list only uses the coding region
+        evaluation = self.alleles[:self.coding+1]
+        for i, allele in enumerate(evaluation):
+            evaluation[i] = _value(allele)
         
-        evaluation = [_value(a) for a in self.alleles]
-
         # Evaluate the gene against obj in reverse
         index = self.coding + 1
         for i in reversed(xrange(index)):

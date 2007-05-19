@@ -111,7 +111,11 @@ if __name__ == '__main__':
     # See how the best trained individual does on the test sample
     l, correct = len(TEST_SAMPLE), 0
     for tumor in TEST_SAMPLE:
-        benign = p.best(tumor) > 0
-        if benign == tumor.benign:
-            correct += 1
+        try:
+            benign = p.best(tumor) > 0
+            if benign == tumor.benign:
+                correct += 1
+        except:
+            pass
+
     print 'SCORE: %d / %d = %0.3f' % (correct, l, correct / float(l)),

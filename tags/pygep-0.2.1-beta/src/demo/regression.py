@@ -30,20 +30,27 @@ class DataPoint(object):
 
 # The chromsomes: fitness is accuracy over the sample
 class Regression(Chromosome):
-    SELECTION_RANGE = 1000.0
+    REWARD = 1000.0
     functions = multiply, add, subtract, divide
     terminals = 'x', 1, 2
-
+    
     def _fitness(self):
-        try:
-            total = sum(self.SELECTION_RANGE - abs(self(x)-x.y)
-                        for x in DataPoint.SAMPLE)
-            return int(max(total, 0.0))
-        except ZeroDivisionError:
-            return 0
+        total = 0
+        for x in DataPoint.SAMPLE:
+            try:
+                guess = self(x) # Evaluation of this chromosome
+                diff = min(1.0, abs((x.y - guess) / x.y))
+                total += self.REWARD * (1 - diff)
+                                
+            except ZeroDivisionError: # semantic error
+                pass
 
+        return total
+    
     def _solved(self):
-        return self.fitness >= (self.SELECTION_RANGE * len(DataPoint.SAMPLE))
+        return self.fitness == self.max_fitness
+
+    max_fitness = property(lambda self: self.REWARD * DataPoint.SAMPLE_SIZE)
 
 
 if __name__ == '__main__':

@@ -7,12 +7,7 @@ to these as they become pertinent.
 
 Current Status
 --------------
-v0.2
-    * Issue #2: Performance enhancement of population cycling?
-    * Issue #3: It may be useful to change multigenic chromosomes so that, 
-                instead of being one list, they are collections of unigenic 
-                chromosomes. That way they could cache sub-ET evaluation 
-                results between chromosomes. 
+v0.2 beta testing
 
 
 Future Releases
@@ -26,4 +21,4 @@ v0.4
     * Issue #11: provide .deb packages
 
 v0.5:
-	* ADFs via hemeotic genes
+    * ADFs via hemeotic genes
