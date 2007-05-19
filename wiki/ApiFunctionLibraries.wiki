@@ -4,7 +4,7 @@
 PyGEP provides some standard function libraries to ease development.
 
 = Words of Caution =
-You are responsible for type consistency within your chromosome's function set and for handling semantic errors.  While GEP chromosomes are guaranteed to be syntactically correct, make sure you aren't doing something weird, like mixing boolean and numeric types, and that you catch errors (such as `divide(1,0)`).
+You are responsible for type consistency within your chromosome's function set and for handling semantic errors.  While GEP chromosomes are guaranteed to be syntactically correct, make sure you aren't doing something weird, like mixing boolean and numeric types, and that you catch errors (such as the `ZeroDivisionError` raised by `divide(1,0)`).
 
 = Function Libraries =
 Each library puts its functions into `__all__`, so importing all of them is as easy as:
