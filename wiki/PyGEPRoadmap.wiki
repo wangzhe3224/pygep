@@ -17,8 +17,7 @@ v0.2 beta testing
  * Issue #11: provide .deb packages
 
 === v0.5 ===
- * ADFs via hemeotic genes
-
+ * ADFs via homeotic genes
 
 
 
