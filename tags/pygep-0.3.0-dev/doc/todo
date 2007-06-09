@@ -1,0 +1,37 @@
+Where is PyGEP going?
+Introduction
+
+This is the development road map going toward a 1.0 release.
+
+
+Current Status
+--------------
+v0.3.0 dev
+    * Issue #3: minor optimizations to gene evaluation 
+    * Issue #13: Built-in function library hierarchy
+      - Reorganization of pygep.functions.mathematical hierarchy 
+      - For each function package, provide tuples to access related functions
+      - Standardization of names (function_op or function_linker)
+	* Issue #19: review interpretation of non-mutation rates
+	* Issue #20: match GEP spec on gene transposition
+    * Issue #15: Should GEP NCs convert to floating point by default
+
+
+Future Releases
+---------------
+v0.3.1
+    * Issue #8: random numerical constants (RNCs) via the special '?' terminal
+	* Issue #13: potential improvements to logical functions library
+
+v0.4
+    * Issue #17: ADFs via homeotic genes
+	* Issue #18: provide out-of-the-box fitness functions
+
+v0.5:
+    * Issue #10: conversion of GEP chromosomes to Python code
+    * Issue #11: provide .deb packages
+
+...
+
+v1.0:
+    * Issue #16: make PyGEP thread-safe

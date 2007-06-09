@@ -1,6 +1,5 @@
 # PyGEP: Gene Expression Programming for Python
 # Copyright (C) 2007  Ryan J. O'Neil
-# http://code.google.com/p/pygep/
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,22 +16,23 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 '''
-PyGEP: Gene Expression Programming for Python
-Copyright (C) 2007  Ryan J. O'Neil
-http://code.google.com/p/pygep/
-
-PyGEP is a simple library suitable for academic study of GEP (Gene 
-Expression Programming) in Python 2.5, aiming for ease of use and 
-rapid implementation. It provides standard multigenic chromosomes; a 
-population class using elitism and fitness scaling for selection;
-mutation, crossover and transposition operators; and some standard 
-GEP functions and linkers.
-
-This software is released under the GPL 2.0.
+Provides a functions for computating fitness statistics about
+a given population
 '''
 
-from pygep.chromosome import Chromosome
-from pygep.population import Population
+import math
 
-__version__ = '0.3.1'
-__all__ = 'Chromosome', 'Population'
+
+def fitness_stats(population):
+    '''
+    Computes fitness statistics for a given population
+    @return: (mean, standard devation, sum)
+    '''
+    num   = float(len(population))
+    total = sum(i.fitness for i in population)
+    mean  = total / num
+
+    variance  = sum((i.fitness - mean) ** 2 for i in population)
+    deviation = math.sqrt((1/num) * variance)
+
+    return mean, deviation, float(total)

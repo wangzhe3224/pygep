@@ -1,6 +1,5 @@
 # PyGEP: Gene Expression Programming for Python
 # Copyright (C) 2007  Ryan J. O'Neil
-# http://code.google.com/p/pygep/
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,22 +16,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 '''
-PyGEP: Gene Expression Programming for Python
-Copyright (C) 2007  Ryan J. O'Neil
-http://code.google.com/p/pygep/
-
-PyGEP is a simple library suitable for academic study of GEP (Gene 
-Expression Programming) in Python 2.5, aiming for ease of use and 
-rapid implementation. It provides standard multigenic chromosomes; a 
-population class using elitism and fitness scaling for selection;
-mutation, crossover and transposition operators; and some standard 
-GEP functions and linkers.
-
-This software is released under the GPL 2.0.
+Common rounding functions:
+    - (FLOOR) floor_op: math.floor(x)
+    - (CEIL ) ceil_op:  math.ceil(x)
+    - (ROUND) round_op: round(x)
+    - (ABS  ) abs_op:   abs(x)
 '''
 
-from pygep.chromosome import Chromosome
-from pygep.population import Population
+from pygep.chromosome import symbol
+import math
 
-__version__ = '0.3.1'
-__all__ = 'Chromosome', 'Population'
+
+__all__ = 'ROUNDING_ALL', 'ROUNDING_ARITY_1'
+
+
+floor_op = symbol('FLOOR')(lambda i: math.floor(i))
+ceil_op  = symbol('CEIL' )(lambda i: math.ceil(i))
+round_op = symbol('ROUND')(lambda i: round(i))
+abs_op   = symbol('ABS'  )(lambda i: abs(i))
+
+
+ROUNDING_ARITY_1 = floor_op, ceil_op, round_op, abs_op
+ROUNDING_ALL = ROUNDING_ARITY_1
